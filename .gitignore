@@ -1,2 +1,4 @@
 *.pyc
 logs/*
+record.mp4
+model.pt

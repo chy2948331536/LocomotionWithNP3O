@@ -141,8 +141,8 @@ class Go2ConstraintHimRoughCfg( LeggedRobotCfg ):
         foot_name = "foot"
         name = "go2"
         penalize_contacts_on = ["thigh", "calf"]
-        terminate_after_contacts_on = []#["base"]
-        self_collisions = 0 # 1 to disable, 0 to enable...bitwise filter
+        terminate_after_contacts_on = ["base"]#["base"]
+        self_collisions = 1 # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = True
   
     class rewards( LeggedRobotCfg.rewards ):
