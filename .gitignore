@@ -2,3 +2,5 @@
 logs/*
 record.mp4
 model.pt
+depoly/build
+depoly/devel
