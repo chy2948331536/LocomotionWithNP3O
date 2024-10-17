@@ -6,7 +6,7 @@ from isaacgym import gymutil, gymtorch
 import numpy as np
 import torch
 import time
-
+import pygame
 
 # Base class for RL tasks
 class BaseTask():
@@ -97,7 +97,17 @@ class BaseTask():
         self.free_cam = False
         self.lookat_id = 0
         self.lookat_vec = torch.tensor([-0, 2, 1], requires_grad=False, device=self.device)
-
+        pygame.init()
+        # 初始化手柄
+        pygame.joystick.init()
+        # 检查是否有连接的手柄
+        if pygame.joystick.get_count() == 0:
+            print("没有检测到任何手柄。")
+            exit()
+        else:
+            self.joystick = pygame.joystick.Joystick(0)
+            self.joystick.init()
+            print(f"检测到手柄：{self.joystick.get_name()}")
 
     def get_observations(self):
         return self.obs_buf

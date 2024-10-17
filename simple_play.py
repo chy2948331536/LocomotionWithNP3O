@@ -47,6 +47,8 @@ def play(args):
     env_cfg.control.use_filter = True
     env_cfg.domain_rand.disturbance = False
     env_cfg.domain_rand.randomize_kpkd = False
+    env_cfg.commands.gamepad_commands = True
+    env_cfg.env.reset = False
     # prepare environment
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
     obs = env.get_observations()
@@ -88,7 +90,7 @@ def play(args):
 
     img_idx = 0
 
-    video_duration = 20
+    video_duration = 2000
     num_frames = int(video_duration / env.dt)
     print(f'gathering {num_frames} frames')
     video = None

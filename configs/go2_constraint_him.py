@@ -105,7 +105,7 @@ class Go2ConstraintHimRoughCfg( LeggedRobotCfg ):
 
         use_filter = True
 
-    class commands( LeggedRobotCfg.control ):
+    class commands( LeggedRobotCfg.commands ):
         curriculum = True
         max_forward_curriculum = 1.5
         max_backward_curriculum = 1.0

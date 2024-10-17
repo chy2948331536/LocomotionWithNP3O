@@ -5,7 +5,7 @@ from isaacgym import gymtorch, gymapi, gymutil
 import torch
 from typing import Dict
 import random
-
+import pygame
 # env related
 from envs.base_task import BaseTask
 
@@ -613,6 +613,23 @@ class LeggedRobot(BaseTask):
 
         if self.cfg.domain_rand.disturbance and (self.common_step_counter % self.cfg.domain_rand.disturbance_interval == 0):
             self._disturbance_robots()
+        
+        pygame.event.pump()
+        self.button_state = {
+            'axes': [self.joystick.get_axis(i) for i in range(self.joystick.get_numaxes())],
+            'buttons': [self.joystick.get_button(i) for i in range(self.joystick.get_numbuttons())],
+            'hats': [self.joystick.get_hat(i) for i in range(self.joystick.get_numhats())]
+        }
+        if self.cfg.commands.gamepad_commands:
+            lin_speed_x,lin_speed_y,ang_speed = -self.button_state['axes'][1]*2,-self.button_state['axes'][0]*1.5,-self.button_state['axes'][3]*2
+            lin_speed_x = max(self.command_ranges["lin_vel_x"][0], min(lin_speed_x, self.command_ranges["lin_vel_x"][1]))
+            lin_speed_y = max(self.command_ranges["lin_vel_y"][0], min(lin_speed_y, self.command_ranges["lin_vel_y"][1]))
+            ang_speed = max(self.command_ranges["ang_vel_yaw"][0], min(ang_speed, self.command_ranges["ang_vel_yaw"][1]))
+            self.commands[:, 0] = torch.tensor([lin_speed_x]).to(device=self.device)
+            self.commands[:, 1] = torch.tensor([lin_speed_y]).to(device=self.device)
+            self.commands[:, 2] = torch.tensor([ang_speed]).to(device=self.device) 
+            self.is_fast_command = (torch.norm(self.commands[:, :3], dim=1) > 0.2).unsqueeze(1)
+            self.commands[env_ids, :3] *= self.is_fast_command[env_ids]
 
     def _process_phase(self):
         """update phase value for all actor"""
@@ -762,6 +779,8 @@ class LeggedRobot(BaseTask):
         self.reset_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1.,
                                    dim=1)
         self.time_out_buf = self.episode_length_buf > self.max_episode_length  # no terminal reward for time-outs
+        if self.cfg.env.reset == False:
+            self.time_out_buf = torch.zeros_like(self.time_out_buf)
         self.reset_buf |= self.time_out_buf
 
     def compute_reward(self):
