@@ -237,13 +237,13 @@ torch::Tensor State_Rl::get_obs()
     obs.push_back(lat_vel);
     obs.push_back(angle);
 
-    std::vector<float> posArray;
-    std::vector<float> velArray;
+    // std::vector<float> posArray;
+    // std::vector<float> velArray;
     // pos
     for (int i = 0; i < 12; ++i)
     {
         float pos = (_lowState->motorState[i].q  - init_pos[i])* pos_scale;
-        posArray.push_back(_lowState->motorState[i].q);
+        // posArray.push_back(_lowState->motorState[i].q);
         obs.push_back(pos);
     }
     
@@ -251,21 +251,21 @@ torch::Tensor State_Rl::get_obs()
     for (int i = 0; i < 12; ++i)
     {
         float vel = _lowState->motorState[i].dq * vel_scale;
-        velArray.push_back(_lowState->motorState[i].dq);
+        // velArray.push_back(_lowState->motorState[i].dq);
         obs.push_back(vel);
     }
 
-    std::cout << "Position Array: ";
-    for (const auto& pos : posArray) {
-        std::cout << pos << " ";
-    }
-    std::cout << std::endl;
+    // std::cout << "Position Array: ";
+    // for (const auto& pos : posArray) {
+    //     std::cout << pos << " ";
+    // }
+    // std::cout << std::endl;
 
-    std::cout << "Velocity Array: ";
-    for (const auto& vel : velArray) {
-        std::cout << vel << " ";
-    }
-    std::cout << std::endl;
+    // std::cout << "Velocity Array: ";
+    // for (const auto& vel : velArray) {
+    //     std::cout << vel << " ";
+    // }
+    // std::cout << std::endl;
     
     // last action
     //float index[12] = {3,4,5,0,1,2,9,10,11,6,7,8};

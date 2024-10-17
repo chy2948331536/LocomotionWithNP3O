@@ -145,7 +145,7 @@ class LeggedRobotCfg(BaseConfig):
         max_linear_velocity = 1000.
         armature = 0.
         thickness = 0.01
-        hang_on = True
+        hang_on = False
 
     class domain_rand:
         randomize_friction = True

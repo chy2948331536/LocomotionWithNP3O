@@ -43,8 +43,8 @@ private:
     float stand_kp[12];
     float stand_kd[12];
 
-    float Kp = 30.0;
-    float Kd = 0.75;
+    float Kp = 40.0;
+    float Kd = 1;
     float infer_dt = 0.02;
 
     //gamepad
