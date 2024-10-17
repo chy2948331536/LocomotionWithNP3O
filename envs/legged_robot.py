@@ -54,7 +54,15 @@ class LeggedRobot(BaseTask):
         self._prepare_cost_function()
         self.init_done = True
         self.global_counter = 0
-
+        self.percent = 0
+        self.hang_on_change_state = 0
+        self.hang_on_change_begin_time = self.gym.get_sim_time(self.sim)
+        pygame.event.pump()
+        self.button_state = {
+            'axes': [self.joystick.get_axis(i) for i in range(self.joystick.get_numaxes())],
+            'buttons': [self.joystick.get_button(i) for i in range(self.joystick.get_numbuttons())],
+            'hats': [self.joystick.get_hat(i) for i in range(self.joystick.get_numhats())]
+        }
         # self.reset_idx(torch.arange(self.num_envs, device=self.device))
         # self.post_physics_step()
 
@@ -623,6 +631,7 @@ class LeggedRobot(BaseTask):
             'buttons': [self.joystick.get_button(i) for i in range(self.joystick.get_numbuttons())],
             'hats': [self.joystick.get_hat(i) for i in range(self.joystick.get_numhats())]
         }
+        # print(self.button_state["buttons"])
         if self.cfg.commands.gamepad_commands:
             lin_speed_x,lin_speed_y,ang_speed = -self.button_state['axes'][1]*2,-self.button_state['axes'][0]*1.5,-self.button_state['axes'][3]*2
             lin_speed_x = max(self.command_ranges["lin_vel_x"][0], min(lin_speed_x, self.command_ranges["lin_vel_x"][1]))
@@ -762,7 +771,22 @@ class LeggedRobot(BaseTask):
             elif self.cfg.control.swing_leg and self.cfg.asset.hang_on:
                 swing_phase = (torch.sin(torch.tensor(self.gym.get_sim_time(self.sim))) + 1) / 2
                 joint_pos_target = self.shrinked_motor_angles * (1 - swing_phase) + self.default_dof_pos * swing_phase
-
+            elif self.cfg.control.command_swing_leg and self.cfg.asset.hang_on:
+                if (self.percent == 1 or self.percent == 0) and self.button_state["buttons"][0] == 1 \
+                    and (self.gym.get_sim_time(self.sim) - self.hang_on_change_begin_time) > 0.5:
+                    self.hang_on_change_begin_time = self.gym.get_sim_time(self.sim)
+                    self.hang_on_change_state = not self.hang_on_change_state
+                    print(self.hang_on_change_state)
+                    if self.percent == 1: self.percent == 0.99999
+                    elif self.percent == 0: self.percent == 0.00001
+                if self.hang_on_change_state == True:
+                    # print(self.percent)
+                    self.percent = min((self.gym.get_sim_time(self.sim) - self.hang_on_change_begin_time)/2,1)
+                    joint_pos_target = self.shrinked_motor_angles * (1 - self.percent) + self.default_dof_pos * self.percent
+                elif self.hang_on_change_state == False:
+                    # print(self.percent)
+                    self.percent = min((self.gym.get_sim_time(self.sim) - self.hang_on_change_begin_time)/2,1)
+                    joint_pos_target = self.default_dof_pos * (1 - self.percent) + self.shrinked_motor_angles * self.percent
         # joint_pos_target = torch.clamp(joint_pos_target,self.dof_pos-1,self.dof_pos+1)
 
         control_type = self.cfg.control.control_type
