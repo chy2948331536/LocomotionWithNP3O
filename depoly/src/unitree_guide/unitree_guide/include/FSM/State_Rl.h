@@ -90,12 +90,17 @@ private:
     float pos_scale = 1.0;
     float vel_scale = 0.05;
     float action_scale[12] = {0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25};
+    float hip_scale[12] = {0.5,1,1,0.5,1,1,0.5,1,1,0.5,1,1};
+    // float hip_scale[12] = {1,1,1,1,1,1,1,1,1,1,1,1};
     float action_delta_max = 1.0;
     float action_delta_min = -1.0;
     //float action_scale[12] = {0.0,0.25,0.25,0.0,0.25,0.25,0.0,0.25,0.25,0.0,0.25,0.25};
     float percent = 0.0;
     int hang_on_change_state = 0;
     long long hang_on_change_begin_time = 0.0;
+    int reindex[12] = {3,4,5,0,1,2,9,10,11,6,7,8};
+    at::Tensor indices;
+    // torch::TensorAccessor<float,1> action_getter;
 };
 
 #endif // RL_H

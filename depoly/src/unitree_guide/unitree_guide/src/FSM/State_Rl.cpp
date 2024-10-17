@@ -17,6 +17,8 @@ void State_Rl::enter()
     // load policy
     model_path = "/home/chy/Downloads/LocomotionWithNP3O/model_9900_deploy.pt";
     load_policy();
+    indices = torch::tensor({3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8}, 
+                            torch::TensorOptions().dtype(torch::kLong).device(device));
 
     // initialize record
     action_buf = torch::zeros({history_length,12},device);
@@ -117,12 +119,14 @@ void State_Rl::run()
         if (hang_on_change_state == 1){
             _percent_2 = static_cast<float>(getSystemTime() - hang_on_change_begin_time)/2000000.0f;
             _percent_2 = std::min(_percent_2, 1.0f);
-            for (int i = 0; i < 12; i++)
+            for (int i = 0; i < 9; i++)
             {
                 write_cmd_lock.lock();
                 _lowCmd->motorCmd[i].q = (1 - _percent_2) * _targetPos_3[i] + _percent_2 * _targetPos_2[i];
+                // std::cout << _lowCmd->motorCmd[i].q << std::endl;
                 write_cmd_lock.unlock();
             }
+            // std::cout << "\n" <<"\n" <<std::endl;
             // std::cout << _percent_2 << std::endl;
         }
         else if (hang_on_change_state == 2){
@@ -132,8 +136,11 @@ void State_Rl::run()
             {
                 write_cmd_lock.lock();
                 _lowCmd->motorCmd[i].q = (1 - _percent_2) * _targetPos_2[i] + _percent_2 * _targetPos_3[i];
+                // std::cout << _lowCmd->motorCmd[i].q << std::endl;
                 write_cmd_lock.unlock();
             }
+            // std::cout << "\n" <<"\n" <<std::endl;
+
             // std::cout << _percent_2 << std::endl;
         }
         else{
@@ -230,19 +237,36 @@ torch::Tensor State_Rl::get_obs()
     obs.push_back(lat_vel);
     obs.push_back(angle);
 
+    std::vector<float> posArray;
+    std::vector<float> velArray;
     // pos
     for (int i = 0; i < 12; ++i)
     {
         float pos = (_lowState->motorState[i].q  - init_pos[i])* pos_scale;
+        posArray.push_back(_lowState->motorState[i].q);
         obs.push_back(pos);
     }
+    
     // vel
     for (int i = 0; i < 12; ++i)
     {
         float vel = _lowState->motorState[i].dq * vel_scale;
+        velArray.push_back(_lowState->motorState[i].dq);
         obs.push_back(vel);
     }
 
+    std::cout << "Position Array: ";
+    for (const auto& pos : posArray) {
+        std::cout << pos << " ";
+    }
+    std::cout << std::endl;
+
+    std::cout << "Velocity Array: ";
+    for (const auto& vel : velArray) {
+        std::cout << vel << " ";
+    }
+    std::cout << std::endl;
+    
     // last action
     //float index[12] = {3,4,5,0,1,2,9,10,11,6,7,8};
     for (int i = 0; i < 12; ++i)
@@ -263,6 +287,7 @@ torch::Tensor State_Rl::model_infer()
     torch::NoGradGuard no_grad;
 
     torch::Tensor obs_tensor = get_obs();
+    // std::cout << "obs_tensor: " << obs_tensor << std::endl;
     //obs_buf = torch::cat({obs_buf.index({Slice(1,None),Slice()}),obs_tensor},0);
 //    auto obs_buf_batch = obs_buf.unsqueeze(0);
 //    auto action_buf_batch = action_buf.unsqueeze(0);
@@ -277,13 +302,16 @@ torch::Tensor State_Rl::model_infer()
     std::vector<torch::jit::IValue> inputs;
     inputs.push_back(obs_tensor.to(torch::kHalf));
     inputs.push_back(obs_buf_batch.to(torch::kHalf));
+    std::cout << obs_tensor << std::endl;
     // for (size_t i = 0; i < inputs.size(); i++) {
     //     std::cout << "inputs[" << i << "] shape: " << inputs[i].toTensor().sizes() << std::endl;
     // }
     // Execute the model and turn its output into a tensor.
     torch::Tensor action_tensor = model.forward(inputs).toTensor();
     action_buf = torch::cat({action_buf.index({Slice(1,None),Slice()}),action_tensor},0);
-
+    // action_getter = action_tensor.accessor<float,1>();
+    std::cout << "action_buf" << action_buf << std::endl;
+    std::cout << "action_buf" << action_tensor << std::endl;
     torch::Tensor action_blend_tensor = 0.8*action_tensor + 0.2*last_action;
     last_action = action_tensor.clone();
 
@@ -307,7 +335,7 @@ void State_Rl::infer()
         //obs_buf = torch::cat({obs_buf.index({Slice(1,None),Slice()}),obs_tensor},0);
 
         torch::Tensor action_raw = model_infer();
-        std::cout << "action_raw: " << action_raw << std::endl;
+        // std::cout << "action_raw: " << action_raw << std::endl;
 //        obs_buf = torch::cat({obs_buf.index({Slice(1,None),Slice()}),obs_tensor},0);
         // action filter
 //        action_raw = 0.8*action_raw + 0.2*last_action;
@@ -328,7 +356,7 @@ void State_Rl::infer()
 //            float  action_value = std::max(std::min(action_getter[j]* action_scale[j], action_delta_max), action_delta_min);
 //            action.at(j) = action_value + init_pos[j];
 //            action_temp.at(j) = action_value/action_scale[j];
-            action[j] = action_getter[j] * action_scale[j] + init_pos[j];
+            action[j] = action_getter[j] * action_scale[j] * hip_scale[j] + init_pos[j];
             action_temp[j] = action_getter[j];
         }
         write_cmd_lock.unlock();

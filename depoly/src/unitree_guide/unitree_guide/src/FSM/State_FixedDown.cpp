@@ -51,14 +51,6 @@ void State_FixedDown::run()
         }
     
     }
-    else
-    {
-        for (int j = 0; j < 12; j++)
-        {
-            // std::cout << "j: " << _lowCmd->motorCmd[j].q << std::endl;
-            _lowCmd->motorCmd[j].q = _targetPos_3[j];
-        }
-    }
 }
 
 void State_FixedDown::exit()
@@ -72,13 +64,9 @@ FSMStateName State_FixedDown::checkChange()
     {
         return FSMStateName::PASSIVE;
     }
-    else if(_lowState->userCmd == UserCommand::L2_A)
-    {
-        return FSMStateName::FIXEDSTAND;
-    }
+    
+    if(_percent_1>=1)
+        return FSMStateName::PASSIVE;
+    else
     return FSMStateName::FIXEDDOWN;
-    // if(_percent_1>=1)
-    //     return FSMStateName::PASSIVE;
-    // else
-    //     return FSMStateName::FIXEDDOWN;
 }

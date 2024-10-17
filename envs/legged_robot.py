@@ -783,7 +783,9 @@ class LeggedRobot(BaseTask):
                 if self.hang_on_change_state == True:
                     # print(self.percent)
                     self.percent = min((self.gym.get_sim_time(self.sim) - self.hang_on_change_begin_time)/2,1)
-                    joint_pos_target = self.shrinked_motor_angles * (1 - self.percent) + self.default_dof_pos * self.percent
+                    joint_pos_target[0,0:6] = (self.shrinked_motor_angles * (1 - self.percent) + self.default_dof_pos * self.percent)[0,0:6]
+                    joint_pos_target[0,9:12] = (self.shrinked_motor_angles * (1 - self.percent) + self.default_dof_pos * self.percent)[0,9:12]
+                    joint_pos_target[0,6:9] = self.shrinked_motor_angles[0,6:9]
                 elif self.hang_on_change_state == False:
                     # print(self.percent)
                     self.percent = min((self.gym.get_sim_time(self.sim) - self.hang_on_change_begin_time)/2,1)

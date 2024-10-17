@@ -14,7 +14,7 @@ import torch
 from global_config import ROOT_DIR
 
 from PIL import Image as im
-
+torch.set_printoptions(precision=3, sci_mode=False)
 def delete_files_in_directory(directory_path):
    try:
      files = os.listdir(directory_path)
@@ -116,6 +116,7 @@ def play(args):
         env.commands[:,1] = 0
         env.commands[:,2] = 0
         env.commands[:,3] = 0
+        # print(obs.half())
         actions = policy.act_teacher(obs.half())
         # actions = torch.clamp(actions,-1.2,1.2)
 

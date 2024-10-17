@@ -122,7 +122,7 @@ class LeggedRobotCfg(BaseConfig):
         hip_scale_reduction = 1
         hang_leg = False
         swing_leg = False
-        command_swing_leg = True
+        command_swing_leg = False
 
     class asset:
         file = ""
