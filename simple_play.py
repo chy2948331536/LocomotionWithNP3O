@@ -48,8 +48,9 @@ def play(args):
     env_cfg.domain_rand.disturbance = False
     env_cfg.domain_rand.randomize_kpkd = False
     env_cfg.commands.gamepad_commands = True
-    env_cfg.env.reset = False
+    env_cfg.env.reset = True
     env_cfg.env.time_reset = False
+    env_cfg.asset.terminate_after_contacts_on = ["base"]
     # prepare environment
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
     obs = env.get_observations()
@@ -66,12 +67,12 @@ def play(args):
                                                       **policy_cfg_dict)
     print(policy)
     #model_dict = torch.load(os.path.join(ROOT_DIR, 'model_4000_phase2_hip.pt'))
-    model_dict = torch.load(os.path.join(ROOT_DIR, 'model_10000.pt'))
+    model_dict = torch.load(os.path.join(ROOT_DIR, 'model_9900.pt'))
     policy.load_state_dict(model_dict['model_state_dict'])
     policy.half()
     policy.eval()
     policy = policy.to(env.device)
-    policy.save_torch_jit_policy('model.pt',env.device)
+    policy.save_torch_jit_policy('model_9900_deploy.pt',env.device)
 
     # clear images under frames folder
     # frames_path = os.path.join(ROOT_DIR, 'logs', train_cfg.runner.experiment_name, 'exported', 'frames')

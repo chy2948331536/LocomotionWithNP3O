@@ -26,25 +26,25 @@ void State_FixedStand::enter(){
 }
 
 void State_FixedStand::run(){
-    _percent_1 += (float)1 / _duration_1;
-    _percent_1 = _percent_1 > 1 ? 1 : _percent_1;
-    if (_percent_1 < 1)
-    {
-        for (int j = 0; j < 12; j++)
-        {
-            _lowCmd->motorCmd[j].q = (1 - _percent_1) * _startPos[j] + _percent_1 * _targetPos_1[j];
-        }
-    }
-    else
-    {
-        _percent_2 += (float)1 / _duration_2;
-        _percent_2 = _percent_2 > 1 ? 1 : _percent_2;
+    // _percent_1 += (float)1 / _duration_1;
+    // _percent_1 = _percent_1 > 1 ? 1 : _percent_1;
+    // if (_percent_1 < 1)
+    // {
+    //     for (int j = 0; j < 12; j++)
+    //     {
+    //         _lowCmd->motorCmd[j].q = (1 - _percent_1) * _startPos[j] + _percent_1 * _targetPos_1[j];
+    //     }
+    // }
+    // else
+    // {
+    _percent_2 += (float)1 / _duration_2;
+    _percent_2 = _percent_2 > 1 ? 1 : _percent_2;
 
-        for (int j = 0; j < 12; j++)
-        {
-            _lowCmd->motorCmd[j].q = (1 - _percent_2) * _targetPos_1[j] + _percent_2 * _targetPos_2[j];
-        }
+    for (int j = 0; j < 12; j++)
+    {
+        _lowCmd->motorCmd[j].q = (1 - _percent_2) * _targetPos_3[j] + _percent_2 * _targetPos_2[j];
     }
+    // }
 }
 
 void State_FixedStand::exit(){

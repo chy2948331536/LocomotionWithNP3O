@@ -30,8 +30,9 @@ public:
 private:
     float _targetPos_1[12] = {0.0, 1.36, -2.65, 0.0, 1.36, -2.65,
                               0.0, 1.36, -2.65, 0.0, 1.36, -2.65};
-    float _targetPos_2[12] = {0.0, 0.9, -1.8, 0.0, 0.9, -1.8,
-                              0.0, 0.9, -1.8, 0.0, 0.9, -1.8};
+    float _targetPos_2[12] = {-0.1, 0.8, -1.5, 0.1, 0.8, -1.5, -0.1, 1.0, -1.5, 0.1, 1.0, -1.5,};
+    float _targetPos_3[12] = {-0.0, 1.5, -2.3, 0.0, 1.5, -2.3,
+                              -0.0, 1.5, -2.3, 0.0, 1.5, -2.3};
     float _startPos[12] = {0.0, 0.67, -1.3, 0.0, 0.67, -1.3,
                            0.0, 0.67, -1.3, 0.0, 0.67, -1.3};
     float _duration_1 = 500;   // steps
@@ -92,6 +93,9 @@ private:
     float action_delta_max = 1.0;
     float action_delta_min = -1.0;
     //float action_scale[12] = {0.0,0.25,0.25,0.0,0.25,0.25,0.0,0.25,0.25,0.0,0.25,0.25};
+    float percent = 0.0;
+    int hang_on_change_state = 0;
+    long long hang_on_change_begin_time = 0.0;
 };
 
 #endif // RL_H

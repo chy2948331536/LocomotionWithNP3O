@@ -374,6 +374,7 @@ class LeggedRobot(BaseTask):
         self.global_counter += 1   
         clip_actions = self.cfg.normalization.clip_actions
         self.actions = torch.clip(actions, -clip_actions, clip_actions).to(self.device)
+        print(self.actions)
         # step physics and render each frame
         self.render()
 

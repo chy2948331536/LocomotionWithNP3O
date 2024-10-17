@@ -22,7 +22,7 @@
     </include>
 
     <!-- Load the URDF into the ROS Parameter Server -->
-    <param name="robot_description"
+    <param name="robot_description" 
            command="$(find xacro)/xacro --inorder '$(arg dollar)$(arg robot_path)/xacro/robot.xacro' 
            DEBUG:=$(arg user_debug)"/>
 
