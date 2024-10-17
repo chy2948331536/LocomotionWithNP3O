@@ -123,6 +123,12 @@ def update_cfg_from_args(env_cfg, cfg_train, args):
         # num envs
         if args.num_envs is not None:
             env_cfg.env.num_envs = args.num_envs
+        if env_cfg.asset.hang_on == True:
+            env_cfg.env.reset = False
+            env_cfg.terrain.mesh_type = 'plane'
+            env_cfg.init_state.pos[2] += 1
+            env_cfg.asset.file = '/home/chy/Downloads/LocomotionWithNP3O/resources/go2/urdf/go2_hang.urdf'
+
     if cfg_train is not None:
         if args.seed is not None:
             cfg_train.seed = args.seed

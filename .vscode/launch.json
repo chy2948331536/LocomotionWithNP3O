@@ -32,6 +32,8 @@
             "justMyCode": false,
             "args": [
                 "--task=go2N3poHim",
+                "--rl_device=cpu",
+                "--sim_device=cpu",
             ]
         },
         {

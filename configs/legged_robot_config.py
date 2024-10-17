@@ -21,6 +21,7 @@ class LeggedRobotCfg(BaseConfig):
         include_foot_contacts = True
         contact_buf_len = 100
         reset = True
+        time_reset = True
 
     class cost:
         num_costs = 1
@@ -119,6 +120,8 @@ class LeggedRobotCfg(BaseConfig):
 
         use_filter = False
         hip_scale_reduction = 1
+        hang_leg = False
+        swing_leg = True
 
     class asset:
         file = ""
@@ -141,6 +144,7 @@ class LeggedRobotCfg(BaseConfig):
         max_linear_velocity = 1000.
         armature = 0.
         thickness = 0.01
+        hang_on = True
 
     class domain_rand:
         randomize_friction = True

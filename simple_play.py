@@ -49,6 +49,7 @@ def play(args):
     env_cfg.domain_rand.randomize_kpkd = False
     env_cfg.commands.gamepad_commands = True
     env_cfg.env.reset = False
+    env_cfg.env.time_reset = False
     # prepare environment
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
     obs = env.get_observations()
