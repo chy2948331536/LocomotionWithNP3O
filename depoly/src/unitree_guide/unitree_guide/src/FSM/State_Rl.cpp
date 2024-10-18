@@ -103,16 +103,19 @@ void State_Rl::run()
     {
         _percent_1 += (float) 1 / _duration_1;
         _percent_1 = _percent_1 > 1 ? 1 : _percent_1;
+        write_cmd_lock.lock();
         if (_percent_1 < 1) {
             for (int j = 0; j < 12; j++) {
                 _lowCmd->motorCmd[j].mode = 10;
-		_lowCmd->motorCmd[j].q = _targetPos_2[j];
+		_lowCmd->motorCmd[j].q = (1 - _percent_1) * _startPos[j] + _percent_1 * action[j];
                 _lowCmd->motorCmd[j].dq = 0;
                 _lowCmd->motorCmd[j].Kp = (1 - _percent_1) * stand_kp[j] + _percent_1 * Kp;
                 _lowCmd->motorCmd[j].Kd = (1 - _percent_1) * stand_kd[j] + _percent_1 * Kd;
                 _lowCmd->motorCmd[j].tau = 0;
             }
+            std::cout << (1 - _percent_1) << std::endl;
         } 
+        write_cmd_lock.unlock();
     }
     else
     {
@@ -312,12 +315,12 @@ torch::Tensor State_Rl::model_infer()
     // action_getter = action_tensor.accessor<float,1>();
     std::cout << "action_buf" << action_buf << std::endl;
     std::cout << "action_buf" << action_tensor << std::endl;
-    torch::Tensor action_blend_tensor = 0.8*action_tensor + 0.2*last_action;
+    // torch::Tensor action_blend_tensor = 0.8*action_tensor + 0.2*last_action;
     last_action = action_tensor.clone();
 
     obs_buf = torch::cat({obs_buf.index({Slice(1,None),Slice()}),obs_tensor},0);
 
-    return action_blend_tensor;
+    return action_tensor;
 }
 // long long last_time = getSystemTime();  // 记录初始时间
 void State_Rl::infer()
@@ -343,12 +346,12 @@ void State_Rl::infer()
         // append to action buffer
         // action_buf = torch::cat({action_buf.index({Slice(1,None),Slice()}),action_raw},0);
         // assign to control
-        action_raw = action_raw.squeeze(0);
-        // move to cpu
-	action_raw = action_raw.to(torch::kFloat32);
-        action_raw = action_raw.to(torch::kCPU);
+        torch::Tensor action_blend_tensor = 0.8*action_raw + 0.2*last_action;
+        action_raw = action_raw.squeeze(0).to(torch::kFloat32).to(torch::kCPU);
+        action_blend_tensor = action_blend_tensor.squeeze(0).to(torch::kFloat32).to(torch::kCPU);
         // assess the result
         auto action_getter = action_raw.accessor<float,1>();
+        auto action_blend_getter = action_blend_tensor.accessor<float,1>();
 
         write_cmd_lock.lock();
         for (int j = 0; j < 12; j++)
@@ -356,7 +359,7 @@ void State_Rl::infer()
 //            float  action_value = std::max(std::min(action_getter[j]* action_scale[j], action_delta_max), action_delta_min);
 //            action.at(j) = action_value + init_pos[j];
 //            action_temp.at(j) = action_value/action_scale[j];
-            action[j] = action_getter[j] * action_scale[j] * hip_scale[j] + init_pos[j];
+            action[j] = action_blend_getter[j] * action_scale[j] * hip_scale[j] + init_pos[j];
             action_temp[j] = action_getter[j];
         }
         write_cmd_lock.unlock();
@@ -395,7 +398,8 @@ FSMStateName State_Rl::checkChange()
     {
         return FSMStateName::PASSIVE;
     }
-    if(_lowState->userCmd == UserCommand::L2_X){
+    if(_lowState->userCmd == UserCommand::L2_A){
+        std::cout << "FSMStateName::FIXEDSTAND" << std::endl;
         return FSMStateName::FIXEDSTAND;
     }
     if(_lowState->userCmd == UserCommand::L1_X){
