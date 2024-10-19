@@ -75,6 +75,8 @@
         "cfenv": "cpp",
         "cinttypes": "cpp",
         "typeindex": "cpp",
-        "variant": "cpp"
-    }
+        "variant": "cpp",
+        "*.ipp": "cpp"
+    },
+    // "cmake.sourceDirectory": "/home/chy/Downloads/LocomotionWithNP3O/depoly/src"
 }

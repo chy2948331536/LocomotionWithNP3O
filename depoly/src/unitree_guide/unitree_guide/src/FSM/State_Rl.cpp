@@ -113,7 +113,7 @@ void State_Rl::run()
                 _lowCmd->motorCmd[j].Kd = (1 - _percent_1) * stand_kd[j] + _percent_1 * Kd;
                 _lowCmd->motorCmd[j].tau = 0;
             }
-            std::cout << (1 - _percent_1) << std::endl;
+            // std::cout << (1 - _percent_1) << std::endl;
         } 
         write_cmd_lock.unlock();
     }
@@ -305,7 +305,7 @@ torch::Tensor State_Rl::model_infer()
     std::vector<torch::jit::IValue> inputs;
     inputs.push_back(obs_tensor.to(torch::kHalf));
     inputs.push_back(obs_buf_batch.to(torch::kHalf));
-    std::cout << obs_tensor << std::endl;
+    // std::cout << obs_tensor << std::endl;
     // for (size_t i = 0; i < inputs.size(); i++) {
     //     std::cout << "inputs[" << i << "] shape: " << inputs[i].toTensor().sizes() << std::endl;
     // }
@@ -313,8 +313,8 @@ torch::Tensor State_Rl::model_infer()
     torch::Tensor action_tensor = model.forward(inputs).toTensor();
     action_buf = torch::cat({action_buf.index({Slice(1,None),Slice()}),action_tensor},0);
     // action_getter = action_tensor.accessor<float,1>();
-    std::cout << "action_buf" << action_buf << std::endl;
-    std::cout << "action_buf" << action_tensor << std::endl;
+    // std::cout << "action_buf" << action_buf << std::endl;
+    // std::cout << "action_buf" << action_tensor << std::endl;
     // torch::Tensor action_blend_tensor = 0.8*action_tensor + 0.2*last_action;
     last_action = action_tensor.clone();
 

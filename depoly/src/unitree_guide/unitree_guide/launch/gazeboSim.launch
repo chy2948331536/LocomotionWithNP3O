@@ -50,6 +50,15 @@
 
     <!-- <node pkg="unitree_gazebo" type="servo" name="servo" required="true" output="screen"/> -->
 
+    <!-- 启动 joy 节点 -->
+    <node name="joy_node" pkg="joy" type="joy_node" output="screen">
+    <!-- 设置参数，如手柄的设备路径，通常是 /dev/input/js0 -->
+    <param name="dev" value="/dev/input/js0" />
+    <!-- 设置手柄的频率 (Hz)，即每秒发布的频率 -->
+    <param name="deadzone" value="0.05" />
+    <param name="autorepeat_rate" value="20" />
+    </node>
+
     <!-- load the parameter unitree_controller -->
     <include file="$(find unitree_controller)/launch/set_ctrl.launch">
         <arg name="rname" value="$(arg rname)"/>

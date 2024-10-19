@@ -5,6 +5,7 @@
 
 #include "interface/IOROS.h"
 #include "interface/KeyBoard.h"
+#include "interface/Gamepad.h"
 #include <iostream>
 #include <unistd.h>
 #include <csignal>
@@ -29,7 +30,8 @@ IOROS::IOROS():IOInterface(){
 
     signal(SIGINT, RosShutDown);
 
-    cmdPanel = new KeyBoard();
+    // cmdPanel = new KeyBoard();
+    cmdPanel = new Gamepad();
 }
 
 IOROS::~IOROS(){

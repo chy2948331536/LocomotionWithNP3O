@@ -5,3 +5,7 @@ model.pt
 depoly/build
 depoly/devel
 depoly/.catkin_workspace
+depoly/logs/*
+.idea/*
+depoly/.catkin_tools/*
+depoly/src/cmake-build-debug/*

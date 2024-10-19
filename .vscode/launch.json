@@ -51,4 +51,5 @@
         },
     ]
 }
+// tensorboard --logdir
 // torch.set_printoptions(precision=3, sci_mode=False)

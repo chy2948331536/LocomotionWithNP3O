@@ -1,0 +1,3 @@
+[submodule "free_dog_sdk_cpp"]
+	path = free_dog_sdk_cpp
+	url = https://github.com/linzhuyue/free_dog_sdk_cpp.git
