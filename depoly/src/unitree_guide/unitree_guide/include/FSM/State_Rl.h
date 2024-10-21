@@ -100,6 +100,7 @@ private:
     long long hang_on_change_begin_time = 0.0;
     int reindex[12] = {3,4,5,0,1,2,9,10,11,6,7,8};
     at::Tensor indices;
+    int pre_hot_infer = 0;
     // torch::TensorAccessor<float,1> action_getter;
 };
 

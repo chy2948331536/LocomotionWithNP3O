@@ -75,6 +75,9 @@ void IOROS::recvState(LowlevelState *state){
         state->imu.gyroscope[i] = _lowState.imu.gyroscope[i];
     }
     state->imu.quaternion[3] = _lowState.imu.quaternion[3];
+    // std::cout << "IMU Orientation: [" << state->imu.quaternion[0] << ", " << state->imu.quaternion[1] << ", " << state->imu.quaternion[2] << ", " << state->imu.quaternion[3] << "]" << std::endl;
+    // std::cout << "IMU Angular Velocity: [" << state->imu.gyroscope[0] << ", " << state->imu.gyroscope[1] << ", " << state->imu.gyroscope[2] << "]" << std::endl;
+    // std::cout << "IMU Linear Acceleration: [" << state->imu.accelerometer[0] << ", " << state->imu.accelerometer[1] << ", " << state->imu.accelerometer[2] << "]" << std::endl;
 }
 
 void IOROS::initSend(){

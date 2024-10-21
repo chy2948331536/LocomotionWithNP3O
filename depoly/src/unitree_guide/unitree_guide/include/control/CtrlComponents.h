@@ -24,6 +24,8 @@ public:
     CtrlComponents(IOInterface *ioInter):ioInter(ioInter){
         lowCmd = new LowlevelCmd();
         lowState = new LowlevelState();
+        lowCmd_ = new FDSC::lowCmd();
+        lowState_ = new FDSC::lowState();
         contact = new VecInt4;
         phase = new Vec4;
         *contact = VecInt4(0, 0, 0, 0);

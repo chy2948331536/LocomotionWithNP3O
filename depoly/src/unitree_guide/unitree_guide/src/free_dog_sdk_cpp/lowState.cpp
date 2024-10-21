@@ -70,7 +70,7 @@ void lowState::dataToMotorState(const std::vector<uint8_t> &data, int index) {
   ddq_raw = static_cast<float>(hex_to_u16_i(data, 21, 23));
   motor_temperature = data[24];
   std::copy(data.begin() + 24, data.end(), res_bms.begin());
-  motorState[index].set_data(motormode, q, dq, ddq, tauEst, q_raw, dq_raw, ddq_raw, motor_temperature, res_bms);
+  motorState_free_dog[index].set_data(motormode, q, dq, ddq, tauEst, q_raw, dq_raw, ddq_raw, motor_temperature, res_bms);
 }
 
 void lowState::parseData(const std::vector<uint8_t> &data) {
@@ -85,7 +85,7 @@ void lowState::parseData(const std::vector<uint8_t> &data) {
     bandWidth[0] = data[20];
     bandWidth[1] = data[21];
     std::vector<uint8_t> imu_data(data.begin() + 22, data.begin() + 75); // 22-75
-    std::cout << "dataToImu(imu_data);" << std::endl;
+    // std::cout << "dataToImu(imu_data);" << std::endl;
     dataToImu(imu_data);
     // std::cout << "dataToImu(imu_data);" << std::endl;
     for (int i = 0; i < 20; i++) {
@@ -126,13 +126,13 @@ void lowState::parseData(const std::vector<uint8_t> &data) {
 
 RotMat lowState::getRotMat(){
   Quat quat;
-  quat << imu_quaternion[0], imu_quaternion[1], imu_quaternion[2], imu_quaternion[3];
+  quat << imu.quaternion[0], imu.quaternion[1], imu.quaternion[2], imu.quaternion[3];
   return quatToRotMat(quat);
 }
 
 Vec3 lowState::getGyro(){
   Vec3 gyro;
-  gyro << imu_gyroscope[0], imu_gyroscope[1], imu_gyroscope[2];
+  gyro << imu.gyroscope[0], imu.gyroscope[1], imu.gyroscope[2];
   return gyro;
 }
 } // namespace FDSC

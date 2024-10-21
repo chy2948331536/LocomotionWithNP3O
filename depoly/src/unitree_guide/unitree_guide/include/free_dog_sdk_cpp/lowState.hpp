@@ -10,6 +10,56 @@
 
 #include "complex.hpp"
 
+struct IMU_Unitree
+{
+    float quaternion[4];    // w, x, y, z
+    float gyroscope[3];
+    float accelerometer[3];
+    IMU_Unitree(){
+        for(int i = 0; i < 3; i++){
+            quaternion[i] = 0;
+            gyroscope[i] = 0;
+            accelerometer[i] = 0;
+        }
+        quaternion[3] = 0;
+    }
+    RotMat getRotMat(){
+        Quat quat;
+        quat << quaternion[0], quaternion[1], quaternion[2], quaternion[3];
+        return quatToRotMat(quat);
+    }
+    Vec3 getAcc(){
+        Vec3 acc;
+        acc << accelerometer[0], accelerometer[1], accelerometer[2];
+        return acc;
+    }
+    Vec3 getGyro(){
+        Vec3 gyro;
+        gyro << gyroscope[0], gyroscope[1], gyroscope[2];
+        return gyro;
+    }
+    Quat getQuat(){
+        Quat q;
+        q << quaternion[0], quaternion[1], quaternion[2], quaternion[3];
+        return q;
+    }
+};
+struct MotorState_Unitree
+{
+    unsigned int mode;
+    float q;
+    float dq;
+    float ddq;
+    float tauEst;
+
+    MotorState_Unitree(){
+        q = 0;
+        dq = 0;
+        ddq = 0;
+        tauEst = 0;
+    }
+};
+
 namespace FDSC {
 class lowState {
  public:
@@ -19,6 +69,8 @@ class lowState {
   uint8_t frameReserve = 0;       // 3
   UserCommand userCmd;
   UserValue userValue;
+  IMU_Unitree imu;
+  MotorState_Unitree motorState[12];
   std::vector<uint8_t> SN{0, 0, 0, 0, 0, 0, 0, 0};      // 4-12
   std::vector<uint8_t> version{0, 0, 0, 0, 0, 0, 0, 0}; // 12-20
   std::vector<uint8_t> bandWidth{0, 0};                  // 20-22
@@ -40,7 +92,7 @@ class lowState {
   uint8_t motor_temperature = 0;
   std::vector<uint8_t> res_bms{0, 0, 0, 0, 0, 0, 0, 0};
   std::vector<MotorState>
-      motorState = std::vector<MotorState>(20, MotorState(motormode, q, dq, ddq, tauEst, q_raw, dq_raw, ddq_raw, motor_temperature, res_bms));
+      motorState_free_dog = std::vector<MotorState>(20, MotorState(motormode, q, dq, ddq, tauEst, q_raw, dq_raw, ddq_raw, motor_temperature, res_bms));
   uint8_t version_h = 0;
   uint8_t version_l = 0;
   uint8_t bms_status = 0;

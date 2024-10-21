@@ -27,8 +27,6 @@ class IOFREEDOGSDK : public IOInterface{
 public:
  IOFREEDOGSDK();
  ~IOFREEDOGSDK();
- void read();
- void write();
 
  void sendRecv(const FDSC::lowCmd *cmd, FDSC::lowState *state);
  void sendCmd(const FDSC::lowCmd *cmd);

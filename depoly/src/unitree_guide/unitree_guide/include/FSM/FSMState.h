@@ -41,6 +41,7 @@ protected:
     FDSC::lowState *_lowState;
 #endif
     UserValue _userValue;
+    IOInterface *ioInter;
 };
 
 #endif  // FSMSTATE_H

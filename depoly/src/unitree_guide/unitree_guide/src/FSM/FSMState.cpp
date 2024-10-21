@@ -8,6 +8,7 @@ FSMState::FSMState(CtrlComponents *ctrlComp, FSMStateName stateName, std::string
             :_ctrlComp(ctrlComp), _stateName(stateName), _stateNameString(stateNameString){
     _lowCmd = _ctrlComp->lowCmd;
     _lowState = _ctrlComp->lowState;
+    ioInter = _ctrlComp->ioInter;
 }
 #endif
 
@@ -16,6 +17,7 @@ FSMState::FSMState(CtrlComponents *ctrlComp, FSMStateName stateName, std::string
             :_ctrlComp(ctrlComp), _stateName(stateName), _stateNameString(stateNameString){
     _lowCmd = _ctrlComp->lowCmd_;
     _lowState = _ctrlComp->lowState_;
+    ioInter = _ctrlComp->ioInter;
 }
 #endif
 

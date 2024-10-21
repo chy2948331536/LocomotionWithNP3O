@@ -18,9 +18,10 @@ void State_FixedDown::enter()
         {
             _lowCmd->setSimStanceGain(i);
         }
-        else if (_ctrlComp->ctrlPlatform == CtrlPlatform::REALROBOT)
+        else if (_ctrlComp->ctrlPlatform == CtrlPlatform::REALROBOT
+            || _ctrlComp->ctrlPlatform == CtrlPlatform::REALROBOT_FREEDOG)
         {
-            _lowCmd->setRealStanceGain(i);
+            _lowCmd->setFixDownGain(i);
         }
         _lowCmd->setZeroDq(i);
         _lowCmd->setZeroTau(i);
@@ -44,10 +45,6 @@ void State_FixedDown::run()
         for (int j = 0; j < 12; j++)
         {
             _lowCmd->motorCmd[j].q = (1 - _percent_1) * _startPos[j] + _percent_1 * _targetPos_3[j];
-            _lowCmd->motorCmd[j].dq = 0;
-            _lowCmd->motorCmd[j].Kp = 60;
-            _lowCmd->motorCmd[j].Kd = 5;
-            _lowCmd->motorCmd[j].tau = 0;
         }
     
     }

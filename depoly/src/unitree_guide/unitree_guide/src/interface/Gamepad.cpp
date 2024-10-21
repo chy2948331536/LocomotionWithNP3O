@@ -34,24 +34,24 @@ void* Gamepad::run(void *arg){
     // 无限循环，处理订阅的手柄数据
     while (ros::ok()) {
         ros::spinOnce();
-        std::cout << "Axes values: ";
+        // std::cout << "Axes values: ";
         for (size_t i = 0; i < currentJoyData.axes.size(); i++) {
-            std::cout << currentJoyData.axes[i] << " ";
+            // std::cout << currentJoyData.axes[i] << " ";
             userValue.ly = max<float>(min<float>(currentJoyData.axes[1], 1.0),-1.0);
             userValue.lx = max<float>(min<float>(currentJoyData.axes[0], 1.0),-1.0);
             userValue.rx = max<float>(min<float>(currentJoyData.axes[3], 1.0),-1.0);
         }
-        std::cout << std::endl;
-        std::cout << "Buttons values: ";
+        // std::cout << std::endl;
+        // std::cout << "Buttons values: ";
         for (size_t i = 0; i < currentJoyData.buttons.size(); i++) {
-            std::cout << currentJoyData.buttons[i] << " ";
+            // std::cout << currentJoyData.buttons[i] << " ";
             if (currentJoyData.buttons[i] == 1){
                 userCmd = commandValues[i];
-                std::cout << "Command value at index " << i << " is " << static_cast<int>(commandValues[i]) <<
-                    std::endl;
+                // std::cout << "Command value at index " << i << " is " << static_cast<int>(commandValues[i]) <<
+                    // std::endl;
             }
         }
-        std::cout << std::endl;
+        // std::cout << std::endl;
         // 等待1毫秒
         usleep(1000);
     }

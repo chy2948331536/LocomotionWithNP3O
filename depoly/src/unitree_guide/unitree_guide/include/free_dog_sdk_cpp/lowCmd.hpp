@@ -27,6 +27,7 @@ class lowCmd {
   std::vector<uint8_t> buildCmd(bool debug = false);
   void setSimStanceGain(int legID);
   void setRealStanceGain(int legID);
+  void setFixDownGain(int legID);
   void setZeroGain(int legID);
   void setZeroGain();
   void setStableGain(int legID);

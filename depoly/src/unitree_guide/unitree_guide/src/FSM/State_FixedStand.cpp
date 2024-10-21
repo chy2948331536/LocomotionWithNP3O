@@ -12,7 +12,8 @@ void State_FixedStand::enter(){
         if(_ctrlComp->ctrlPlatform == CtrlPlatform::GAZEBO){
             _lowCmd->setSimStanceGain(i);
         }
-        else if(_ctrlComp->ctrlPlatform == CtrlPlatform::REALROBOT){
+        else if(_ctrlComp->ctrlPlatform == CtrlPlatform::REALROBOT
+            || _ctrlComp->ctrlPlatform == CtrlPlatform::REALROBOT_FREEDOG){
             _lowCmd->setRealStanceGain(i);
         }
         _lowCmd->setZeroDq(i);
