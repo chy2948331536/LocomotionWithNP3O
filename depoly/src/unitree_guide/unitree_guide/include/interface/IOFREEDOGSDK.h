@@ -6,7 +6,7 @@
 
 #include "IOInterface.h"
 #include "ros/ros.h"
-
+#include <interface/Gamepad.h>
 const std::vector<std::string> CONTACT_SENSOR_NAMES = {"RF_FOOT", "LF_FOOT", "RH_FOOT", "LH_FOOT"};
 
 struct UnitreeMotorData {

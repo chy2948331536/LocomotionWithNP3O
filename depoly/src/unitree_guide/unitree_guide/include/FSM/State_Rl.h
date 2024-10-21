@@ -35,7 +35,9 @@ private:
                               -0.0, 1.5, -2.3, 0.0, 1.5, -2.3};
     float _startPos[12] = {0.0, 0.67, -1.3, 0.0, 0.67, -1.3,
                            0.0, 0.67, -1.3, 0.0, 0.67, -1.3};
-    float _duration_1 = 500;   // steps
+    float _startPos_rl[12] = {0.0, 0.67, -1.3, 0.0, 0.67, -1.3,
+                           0.0, 0.67, -1.3, 0.0, 0.67, -1.3};
+    float _duration_1 = 1000;   // steps
     float _duration_2 = 10; // B2
     float _percent_1 = 0;    //%
     float _percent_2 = 0;    //%
@@ -48,7 +50,7 @@ private:
     float infer_dt = 0.02;
 
     //gamepad
-    float smooth = 0.03;
+    float smooth = 0.2;
     float dead_zone = 0.01;
 
     float rx = 0.;

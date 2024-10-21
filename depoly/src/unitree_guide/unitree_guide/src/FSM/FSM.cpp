@@ -36,9 +36,9 @@ void FSM::run(){
     _ctrlComp->sendRecv();
     _ctrlComp->runWaveGen();
     _ctrlComp->estimator->run();
-    if(!checkSafty()){
-        _ctrlComp->ioInter->setPassive();
-    }
+    // if(!checkSafty()){
+    //     _ctrlComp->ioInter->setPassive();
+    // }
 
     if(_mode == FSMMode::NORMAL){
         _currentState->run();

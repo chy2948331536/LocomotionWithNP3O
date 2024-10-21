@@ -76,28 +76,30 @@ void State_Rl::enter()
       ioInter->sendRecv(_lowCmd,_lowState);
       action_filters.push_back(new LPFilter(0.002,20.0));
     }
+
+    for(int i=0; i<12; i++){
+        _startPos[i] = _lowState->motorState[i].q;
+    }
     std::cout << "RL enter over" << std::endl;
 }
 
 void State_Rl::run()
-{   
+{
+    // for (int j = 0; j < 12; j++) {
+    //     std::cout << "Kp: " << _lowCmd->motorCmd[j].Kp << std::endl;
+    //     std::cout << "Kd: " << _lowCmd->motorCmd[j].Kd << std::endl;
+    // }
     if (_percent_1 < 1)
     {
         _percent_1 += (float) 1 / _duration_1;
         _percent_1 = _percent_1 > 1 ? 1 : _percent_1;
-        write_cmd_lock.lock();
         if (_percent_1 < 1) {
             for (int j = 0; j < 12; j++) {
-  //               _lowCmd->motorCmd[j].mode = 10;
-		// _lowCmd->motorCmd[j].q = (1 - _percent_1) * _startPos[j] + _percent_1 * action[j];
-  //               _lowCmd->motorCmd[j].dq = 0;
-  //               _lowCmd->motorCmd[j].Kp = (1 - _percent_1) * stand_kp[j] + _percent_1 * Kp;
-  //               _lowCmd->motorCmd[j].Kd = (1 - _percent_1) * stand_kd[j] + _percent_1 * Kd;
-  //               _lowCmd->motorCmd[j].tau = 0;
+                _lowCmd->motorCmd[j].q = (1 - _percent_1) * _startPos[j] + _percent_1 * _startPos_rl[j];
+                _lowCmd->motorCmd[j].Kp = (1 - _percent_1) * stand_kp[j] + _percent_1 * Kp;
+                _lowCmd->motorCmd[j].Kd = (1 - _percent_1) * stand_kd[j] + _percent_1 * Kd;
             }
-            // std::cout << (1 - _percent_1) << std::endl;
         }
-        write_cmd_lock.unlock();
     }
     else
     {
@@ -129,30 +131,34 @@ void State_Rl::run()
             // std::cout << _percent_2 << std::endl;
         }
         else{
-    //        _percent_2 += (float) 1 / _duration_2;
-    //        _percent_2 = _percent_2 > 1 ? 1 : _percent_2;
+            //        _percent_2 += (float) 1 / _duration_2;
+            //        _percent_2 = _percent_2 > 1 ? 1 : _percent_2;
             write_cmd_lock.lock();
             for (int j = 0; j < 12; j++)
             {
                 //float target = (1-_percent_2)*prev_action[j]+_percent_2*action[j];
                 //action_filters[j]->addValue(action[j]);
 
-                // _lowCmd->motorCmd[j].mode = 10;
-                // _lowCmd->motorCmd[j].q = action[j];//action_filters[j]->getValue();
-                // _lowCmd->motorCmd[j].dq = 0;
-                // _lowCmd->motorCmd[j].Kp = Kp;
-                // _lowCmd->motorCmd[j].Kd = Kd;
-                // _lowCmd->motorCmd[j].tau = 0;
+                _lowCmd->motorCmd[j].mode = 10;
+                // std::cout << _percent_1<< std::endl;
+                if(_percent_1 > 1.1)
+                {
+                    std::cout << "_percent_1 > 1.1!!!!!!!!!!!!!!!" << std::endl;
+                    _lowCmd->motorCmd[j].q = action[j];//action_filters[j]->getValue();
+                }
+                _lowCmd->motorCmd[j].dq = 0;
+                _lowCmd->motorCmd[j].Kp = Kp;
+                _lowCmd->motorCmd[j].Kd = Kd;
+                _lowCmd->motorCmd[j].tau = 0;
 
-    //            if(_percent_2 == 1)
-    //            {
-    //                prev_action[j] = action[j];
-    //            }
+                //            if(_percent_2 == 1)
+                //            {
+                //                prev_action[j] = action[j];
+                //            }
             }
             write_cmd_lock.unlock();
         }
     }
-   
 }
 
 void State_Rl::exit()
@@ -224,13 +230,13 @@ torch::Tensor State_Rl::get_obs()
     obs.push_back(lat_vel);
     obs.push_back(angle);
 
-    // std::vector<float> posArray;
+    std::vector<float> posArray;
     // std::vector<float> velArray;
     // pos
     for (int i = 0; i < 12; ++i)
     {
         float pos = (_lowState->motorState[i].q  - init_pos[i])* pos_scale;
-        // posArray.push_back(_lowState->motorState[i].q);
+        posArray.push_back(_lowState->motorState[i].q);
         obs.push_back(pos);
     }
     
@@ -242,11 +248,11 @@ torch::Tensor State_Rl::get_obs()
         obs.push_back(vel);
     }
 
-    // std::cout << "Position Array: ";
-    // for (const auto& pos : posArray) {
-    //     std::cout << pos << " ";
-    // }
-    // std::cout << std::endl;
+    std::cout << "Position Array: ";
+    for (const auto& pos : posArray) {
+        std::cout << pos << " ";
+    }
+    std::cout << std::endl;
 
     // std::cout << "Velocity Array: ";
     // for (const auto& vel : velArray) {
@@ -265,7 +271,7 @@ torch::Tensor State_Rl::get_obs()
     auto options = torch::TensorOptions().dtype(torch::kFloat32);
 //    torch::Tensor obs_tensor = torch::from_blob(obs.data(),{1,30},options).to(device);
     torch::Tensor obs_tensor = torch::from_blob(obs.data(),{1,45},options).to(device);
-    std::cout << "obs_tensor: " << obs_tensor << std::endl;
+    // std::cout << "obs_tensor: " << obs_tensor << std::endl;
     return obs_tensor;
 }
 
@@ -322,8 +328,12 @@ void State_Rl::infer()
         auto action_blend_getter = action_blend_tensor.accessor<float,1>();
 
         write_cmd_lock.lock();
-        if (pre_hot_infer<200)
-            pre_hot_infer ++;
+        if (_percent_1<1.1)
+        {
+            _percent_1 += (float) 1 / _duration_1;
+            _percent_1 = _percent_1 > 1.1 ? 1.11 : _percent_1;
+            std::cout << "_percent_1: " << _percent_1 << std::endl;
+        }
         else
             for (int j = 0; j < 12; j++)
             {
