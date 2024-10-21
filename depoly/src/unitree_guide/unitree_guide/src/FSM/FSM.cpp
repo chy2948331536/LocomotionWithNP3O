@@ -31,32 +31,32 @@ void FSM::run(){
     // long long time_difference = current_time - last_time;
     // std::cout << "Time interval since last loop: " << time_difference << " microseconds" << std::endl;
     // last_time = current_time;
-
+    std::cout << "FSM running" << std::endl;
     _startTime = getSystemTime();
     _ctrlComp->sendRecv();
-    _ctrlComp->runWaveGen();
-    _ctrlComp->estimator->run();
-    if(!checkSafty()){
-        // _ctrlComp->ioInter->setPassive();
-    }
-
-    if(_mode == FSMMode::NORMAL){
-        _currentState->run();
-        _nextStateName = _currentState->checkChange();
-        if(_nextStateName != _currentState->_stateName){
-            _mode = FSMMode::CHANGE;
-            _nextState = getNextState(_nextStateName);
-            std::cout << "Switched from " << _currentState->_stateNameString
-                      << " to " << _nextState->_stateNameString << std::endl;
-        }
-    }
-    else if(_mode == FSMMode::CHANGE){
-        _currentState->exit();
-        _currentState = _nextState;
-        _currentState->enter();
-        _mode = FSMMode::NORMAL;
-        _currentState->run();
-    }
+    // _ctrlComp->runWaveGen();
+    // _ctrlComp->estimator->run();
+    // if(!checkSafty()){
+    //     _ctrlComp->ioInter->setPassive();
+    // }
+    //
+    // if(_mode == FSMMode::NORMAL){
+    //     _currentState->run();
+    //     _nextStateName = _currentState->checkChange();
+    //     if(_nextStateName != _currentState->_stateName){
+    //         _mode = FSMMode::CHANGE;
+    //         _nextState = getNextState(_nextStateName);
+    //         std::cout << "Switched from " << _currentState->_stateNameString
+    //                   << " to " << _nextState->_stateNameString << std::endl;
+    //     }
+    // }
+    // else if(_mode == FSMMode::CHANGE){
+    //     _currentState->exit();
+    //     _currentState = _nextState;
+    //     _currentState->enter();
+    //     _mode = FSMMode::NORMAL;
+    //     _currentState->run();
+    // }
 
     absoluteWait(_startTime, (long long)(_ctrlComp->dt * 1000000));
 }

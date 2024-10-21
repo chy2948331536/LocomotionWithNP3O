@@ -15,6 +15,8 @@
 #include "common/mathTypes.h"
 #include "common/timeMarker.h"
 #include "interface/CmdPanel.h"
+#include "free_dog_sdk_cpp/lowCmd.hpp"
+#include "free_dog_sdk_cpp/lowState.hpp"
 
 class FSMState{
 public:
@@ -31,8 +33,13 @@ protected:
     CtrlComponents *_ctrlComp;
     FSMStateName _nextStateName;
 
+#if defined(COMPILE_WITH_SIMULATION) || defined(COMPILE_WITH_REAL_ROBOT)
     LowlevelCmd *_lowCmd;
     LowlevelState *_lowState;
+#elif defined(COMPILE_WITH_REAL_ROBOT_FREE_DOG)
+    FDSC::lowCmd *_lowCmd;
+    FDSC::lowState *_lowState;
+#endif
     UserValue _userValue;
 };
 

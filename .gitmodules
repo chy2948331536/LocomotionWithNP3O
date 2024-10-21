@@ -1,3 +1,12 @@
 [submodule "free_dog_sdk_cpp"]
 	path = free_dog_sdk_cpp
 	url = https://github.com/linzhuyue/free_dog_sdk_cpp.git
+[submodule "depoly/src/free_dog_sdk_cpp"]
+	path = depoly/src/free_dog_sdk_cpp
+	url = https://github.com/linzhuyue/free_dog_sdk_cpp.git
+[submodule "depoly/src/unitree_guide/unitree_guide/src/free_dog_sdk_cpp"]
+	path = depoly/src/unitree_guide/unitree_guide/src/free_dog_sdk_cpp
+	url = https://github.com/linzhuyue/free_dog_sdk_cpp.git
+[submodule "depoly/src/depoly/src/free_dog_sdk_cpp"]
+	path = depoly/src/depoly/src/free_dog_sdk_cpp
+	url = https://github.com/linzhuyue/free_dog_sdk_cpp.git
