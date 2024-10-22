@@ -24,6 +24,8 @@ public:
     CtrlComponents(IOInterface *ioInter):ioInter(ioInter){
         lowCmd = new LowlevelCmd();
         lowState = new LowlevelState();
+        lowCmd_ = new FDSC::lowCmd();
+        lowState_ = new FDSC::lowState();
         contact = new VecInt4;
         phase = new Vec4;
         *contact = VecInt4(0, 0, 0, 0);
@@ -43,6 +45,8 @@ public:
     }
     LowlevelCmd *lowCmd;
     LowlevelState *lowState;
+    FDSC::lowState *lowState_;
+    FDSC::lowCmd *lowCmd_;
     IOInterface *ioInter;
     QuadrupedRobot *robotModel;
     WaveGenerator *waveGen;
@@ -61,7 +65,11 @@ public:
     CtrlPlatform ctrlPlatform;
 
     void sendRecv(){
-        ioInter->sendRecv(lowCmd, lowState);
+        #if defined(COMPILE_WITH_SIMULATION) || defined(COMPILE_WITH_REAL_ROBOT)
+            ioInter->sendRecv(lowCmd, lowState);
+        #elif defined(COMPILE_WITH_REAL_ROBOT_FREE_DOG)
+            ioInter->sendRecv(lowCmd_,lowState_);
+        #endif
     }
 
     void runWaveGen(){

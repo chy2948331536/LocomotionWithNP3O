@@ -1,0 +1,13 @@
+<launch>
+  <!-- Launch junior_ctrl node -->
+  <node name="junior_ctrl" pkg="unitree_guide" type="junior_ctrl" output="screen">
+    <param name="param_name" value="param_value" />  <!-- 如果junior_ctrl需要参数，可以在这里添加 -->
+  </node>
+
+  <!-- Launch joy_node for joystick control -->
+  <node name="joy_node" pkg="joy" type="joy_node" output="screen">
+    <!-- 可以根据你的手柄类型添加必要的参数 -->
+    <param name="dev" value="/dev/input/js0" /> <!-- 指定手柄设备 -->
+    <param name="deadzone" value="0.1" /> <!-- 设置手柄死区，可以根据需要调整 -->
+  </node>
+</launch>

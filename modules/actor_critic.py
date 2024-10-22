@@ -2631,6 +2631,7 @@ class ActorCriticBarlowTwins(nn.Module):
         # obs_prop = obs[:, :self.num_prop]
         # obs_hist = obs[:, -self.num_hist*self.num_prop:].view(-1, self.num_hist, self.num_prop)
         obs_prop = obs[:, 3:self.num_prop]
+        # print(obs_prop)
         obs_hist = obs[:, -self.num_hist*self.num_prop:].view(-1, self.num_hist, self.num_prop)[:,:,3:]
         mean = self.actor_teacher_backbone(obs_prop,obs_hist)
         return mean

@@ -17,13 +17,14 @@ void State_Passive::enter(){
             _lowCmd->motorCmd[i].tau = 0;
         }
     }
-    else if(_ctrlComp->ctrlPlatform == CtrlPlatform::REALROBOT){
+    else if(_ctrlComp->ctrlPlatform == CtrlPlatform::REALROBOT
+        ||_ctrlComp->ctrlPlatform == CtrlPlatform::REALROBOT_FREEDOG){
         for(int i=0; i<12; i++){
             _lowCmd->motorCmd[i].mode = 10;
             _lowCmd->motorCmd[i].q = 0;
             _lowCmd->motorCmd[i].dq = 0;
             _lowCmd->motorCmd[i].Kp = 0;
-            _lowCmd->motorCmd[i].Kd = 3;
+            _lowCmd->motorCmd[i].Kd = 1;
             _lowCmd->motorCmd[i].tau = 0;
         }
     }

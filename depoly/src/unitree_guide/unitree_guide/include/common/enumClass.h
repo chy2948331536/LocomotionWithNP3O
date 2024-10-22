@@ -10,6 +10,7 @@
 enum class CtrlPlatform{
     GAZEBO,
     REALROBOT,
+    REALROBOT_FREEDOG,
 };
 
 enum class RobotType{

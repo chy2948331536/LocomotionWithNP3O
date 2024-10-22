@@ -1,6 +1,6 @@
 <launch>
     <arg name="wname" default="earth"/>
-    <arg name="rname" default="go2"/>
+    <arg name="rname" default="go1"/>
     <arg name="robot_path" value="(find $(arg rname)_description)"/>
     <arg name="dollar" value="$"/>
 
@@ -22,7 +22,7 @@
     </include>
 
     <!-- Load the URDF into the ROS Parameter Server -->
-    <param name="robot_description"
+    <param name="robot_description" 
            command="$(find xacro)/xacro --inorder '$(arg dollar)$(arg robot_path)/xacro/robot.xacro' 
            DEBUG:=$(arg user_debug)"/>
 
@@ -49,6 +49,15 @@
     </node>
 
     <!-- <node pkg="unitree_gazebo" type="servo" name="servo" required="true" output="screen"/> -->
+
+    <!-- 启动 joy 节点 -->
+    <node name="joy_node" pkg="joy" type="joy_node" output="screen">
+    <!-- 设置参数，如手柄的设备路径，通常是 /dev/input/js0 -->
+    <param name="dev" value="/dev/input/js0" />
+    <!-- 设置手柄的频率 (Hz)，即每秒发布的频率 -->
+    <param name="deadzone" value="0.05" />
+    <param name="autorepeat_rate" value="20" />
+    </node>
 
     <!-- load the parameter unitree_controller -->
     <include file="$(find unitree_controller)/launch/set_ctrl.launch">

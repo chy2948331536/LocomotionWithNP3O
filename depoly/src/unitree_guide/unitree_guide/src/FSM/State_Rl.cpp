@@ -9,21 +9,14 @@ State_Rl::State_Rl(CtrlComponents *ctrlComp)
     : FSMState(ctrlComp, FSMStateName::RL, "rl"),
     _est(ctrlComp->estimator)
 {
-
-}
-
-void State_Rl::enter()
-{
     // load policy
-    model_path = "/home/chy/Downloads/LocomotionWithNP3O/model_mixed_him_baseline_kp30.pt";
+    model_path = "/home/chy/Downloads/LocomotionWithNP3O/model.pt";
     load_policy();
-
-    // initialize record
+    indices = torch::tensor({3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8},
+                            torch::TensorOptions().dtype(torch::kLong).device(device));
     action_buf = torch::zeros({history_length,12},device);
-//    obs_buf = torch::zeros({history_length,30},device);
     obs_buf = torch::zeros({history_length,45},device);
     last_action = torch::zeros({1,12},device);
-
     action_buf.to(torch::kHalf);
     obs_buf.to(torch::kHalf);
     last_action.to(torch::kHalf);
@@ -46,96 +39,127 @@ void State_Rl::enter()
         action_temp.push_back(0.0);
         //action.push_back(_lowState->motorState[j].q);
         //prev_action.push_back(_lowState->motorState[j].q);
-	action.push_back(init_pos[j]);
+        action.push_back(init_pos[j]);
         prev_action.push_back(init_pos[j]);
-
     }
-//    for (int j = 0; j < 12; j++)
-//    {
-//        action.push_back(0.0);
-//    }
+    std::cout << "RL init over" << std::endl;
+}
 
+void State_Rl::enter()
+{
     for (int i = 0; i < history_length; i++)
     {
+        ioInter->sendRecv(_lowCmd,_lowState);
+
         torch::Tensor obs_tensor = get_obs();
         // append obs to obs buffer
         obs_buf = torch::cat({obs_buf.index({Slice(1,None),Slice()}),obs_tensor},0);
     }
-    std::cout << "init finised predict" << std::endl;
+    // for (int i = 0; i < 200; i++)
+    // {
+    //     ioInter->sendRecv(_lowCmd,_lowState);
+    //     model_infer();
+    // }
 
-    for (int i = 0; i < 200; i++)
-    {
-        model_infer();
-    }
-
-    // initialize thread
     threadRunning = true;
+    pre_hot_infer = 0;
     infer_thread = new std::thread(&State_Rl::infer,this);
 
-
-    // smooth transition of kp and kd
     for (int j = 0; j < 12; j++)
     {
+        ioInter->sendRecv(_lowCmd,_lowState);
         stand_kd[j] = _lowCmd->motorCmd[j].Kd;
         stand_kp[j] = _lowCmd->motorCmd[j].Kp;
     }
-    // for(int i = 0; i < _duration_1; i++) {
-    //     _percent_1 += (float) 1 / _duration_1;
-    //     _percent_1 = _percent_1 > 1 ? 1 : _percent_1;
-    //     if (_percent_1 < 1) {
-    //         for (int j = 0; j < 12; j++) {
-    //             _lowCmd->motorCmd[j].Kp = (1 - _percent_1) * stand_kp[j] + _percent_1 * Kp;
-    //             _lowCmd->motorCmd[j].Kd = (1 - _percent_1) * stand_kd[j] + _percent_1 * Kd;
-    //         }
-    //     }
-    // }
     for (int j = 0; j < 12; j++)
     {
+      ioInter->sendRecv(_lowCmd,_lowState);
       action_filters.push_back(new LPFilter(0.002,20.0));
     }
+
+    for(int i=0; i<12; i++){
+        _startPos[i] = _lowState->motorState[i].q;
+    }
+    std::cout << "RL enter over" << std::endl;
 }
 
 void State_Rl::run()
-{   
+{
+    // for (int j = 0; j < 12; j++) {
+    //     std::cout << "Kp: " << _lowCmd->motorCmd[j].Kp << std::endl;
+    //     std::cout << "Kd: " << _lowCmd->motorCmd[j].Kd << std::endl;
+    // }
     if (_percent_1 < 1)
     {
         _percent_1 += (float) 1 / _duration_1;
         _percent_1 = _percent_1 > 1 ? 1 : _percent_1;
         if (_percent_1 < 1) {
             for (int j = 0; j < 12; j++) {
-                _lowCmd->motorCmd[j].mode = 10;
-		_lowCmd->motorCmd[j].q = (1 - _percent_1) * _startPos[j] + _percent_1 * init_pos[j];
-                _lowCmd->motorCmd[j].dq = 0;
+                _lowCmd->motorCmd[j].q = (1 - _percent_1) * _startPos[j] + _percent_1 * _startPos_rl[j];
                 _lowCmd->motorCmd[j].Kp = (1 - _percent_1) * stand_kp[j] + _percent_1 * Kp;
                 _lowCmd->motorCmd[j].Kd = (1 - _percent_1) * stand_kd[j] + _percent_1 * Kd;
-                _lowCmd->motorCmd[j].tau = 0;
             }
-        } 
+        }
     }
     else
     {
-//        _percent_2 += (float) 1 / _duration_2;
-//        _percent_2 = _percent_2 > 1 ? 1 : _percent_2;
-        write_cmd_lock.lock();
-        for (int j = 0; j < 12; j++)
-        {
-            //float target = (1-_percent_2)*prev_action[j]+_percent_2*action[j];
-            //action_filters[j]->addValue(action[j]);
-            _lowCmd->motorCmd[j].mode = 10;
-            _lowCmd->motorCmd[j].q = action[j];//action_filters[j]->getValue();
-            _lowCmd->motorCmd[j].dq = 0;
-            _lowCmd->motorCmd[j].Kp = Kp;
-            _lowCmd->motorCmd[j].Kd = Kd;
-            _lowCmd->motorCmd[j].tau = 0;
-
-//            if(_percent_2 == 1)
-//            {
-//                prev_action[j] = action[j];
-//            }
+        if (hang_on_change_state == 1){
+            _percent_2 = static_cast<float>(getSystemTime() - hang_on_change_begin_time)/2000000.0f;
+            _percent_2 = std::min(_percent_2, 1.0f);
+            for (int i = 0; i < 9; i++)
+            {
+                write_cmd_lock.lock();
+                _lowCmd->motorCmd[i].q = (1 - _percent_2) * _targetPos_3[i] + _percent_2 * _targetPos_2[i];
+                // std::cout << _lowCmd->motorCmd[i].q << std::endl;
+                write_cmd_lock.unlock();
+            }
+            // std::cout << "\n" <<"\n" <<std::endl;
+            // std::cout << _percent_2 << std::endl;
         }
-        write_cmd_lock.unlock();
+        else if (hang_on_change_state == 2){
+            _percent_2 = static_cast<float>(getSystemTime() - hang_on_change_begin_time)/2000000.0f;
+            _percent_2 = std::min(_percent_2, 1.0f);
+            for (int i = 0; i < 12; i++)
+            {
+                write_cmd_lock.lock();
+                _lowCmd->motorCmd[i].q = (1 - _percent_2) * _targetPos_2[i] + _percent_2 * _targetPos_3[i];
+                // std::cout << _lowCmd->motorCmd[i].q << std::endl;
+                write_cmd_lock.unlock();
+            }
+            // std::cout << "\n" <<"\n" <<std::endl;
+
+            // std::cout << _percent_2 << std::endl;
+        }
+        else{
+            //        _percent_2 += (float) 1 / _duration_2;
+            //        _percent_2 = _percent_2 > 1 ? 1 : _percent_2;
+            write_cmd_lock.lock();
+            for (int j = 0; j < 12; j++)
+            {
+                //float target = (1-_percent_2)*prev_action[j]+_percent_2*action[j];
+                //action_filters[j]->addValue(action[j]);
+
+                _lowCmd->motorCmd[j].mode = 10;
+                // std::cout << _percent_1<< std::endl;
+                if(_percent_1 > 1.1)
+                {
+                    // std::cout << "_percent_1 > 1.1!!!!!!!!!!!!!!!" << std::endl;
+                    if (!std::isnan(action[j]))
+                        _lowCmd->motorCmd[j].q = action[j];//action_filters[j]->getValue();
+                }
+                _lowCmd->motorCmd[j].dq = 0;
+                _lowCmd->motorCmd[j].Kp = Kp;
+                _lowCmd->motorCmd[j].Kd = Kd;
+                _lowCmd->motorCmd[j].tau = 0;
+
+                //            if(_percent_2 == 1)
+                //            {
+                //                prev_action[j] = action[j];
+                //            }
+            }
+            write_cmd_lock.unlock();
+        }
     }
-   
 }
 
 void State_Rl::exit()
@@ -152,6 +176,7 @@ torch::Tensor State_Rl::get_obs()
     // compute gravity
     _B2G_RotMat = _lowState->getRotMat();
     _G2B_RotMat = _B2G_RotMat.transpose();
+    // std::cout << "_G2B_RotMat" << _G2B_RotMat << std::endl;
 
     Vec3 angvel = _lowState->getGyro();
     Vec3 projected_gravity = _G2B_RotMat*gravity;
@@ -206,19 +231,36 @@ torch::Tensor State_Rl::get_obs()
     obs.push_back(lat_vel);
     obs.push_back(angle);
 
+    std::vector<float> posArray;
+    std::vector<float> velArray;
     // pos
     for (int i = 0; i < 12; ++i)
     {
         float pos = (_lowState->motorState[i].q  - init_pos[i])* pos_scale;
+        // posArray.push_back(_lowState->motorState[i].q);
         obs.push_back(pos);
     }
+    
     // vel
     for (int i = 0; i < 12; ++i)
     {
         float vel = _lowState->motorState[i].dq * vel_scale;
+        // velArray.push_back(_lowState->motorState[i].dq);
         obs.push_back(vel);
     }
 
+    // std::cout << "Position Array: ";
+    // for (const auto& pos : posArray) {
+    //     std::cout << pos << " ";
+    // }
+    // std::cout << std::endl;
+
+    // std::cout << "Velocity Array: ";
+    // for (const auto& vel : velArray) {
+    //     std::cout << vel << " ";
+    // }
+    // std::cout << std::endl;
+    
     // last action
     //float index[12] = {3,4,5,0,1,2,9,10,11,6,7,8};
     for (int i = 0; i < 12; ++i)
@@ -230,7 +272,7 @@ torch::Tensor State_Rl::get_obs()
     auto options = torch::TensorOptions().dtype(torch::kFloat32);
 //    torch::Tensor obs_tensor = torch::from_blob(obs.data(),{1,30},options).to(device);
     torch::Tensor obs_tensor = torch::from_blob(obs.data(),{1,45},options).to(device);
-
+    // std::cout << "obs_tensor: " << obs_tensor << std::endl;
     return obs_tensor;
 }
 
@@ -239,33 +281,21 @@ torch::Tensor State_Rl::model_infer()
     torch::NoGradGuard no_grad;
 
     torch::Tensor obs_tensor = get_obs();
-    //obs_buf = torch::cat({obs_buf.index({Slice(1,None),Slice()}),obs_tensor},0);
-//    auto obs_buf_batch = obs_buf.unsqueeze(0);
-//    auto action_buf_batch = action_buf.unsqueeze(0);
-//
-//    std::vector<torch::jit::IValue> inputs;
-//    inputs.push_back(obs_buf_batch);
-//    inputs.push_back(action_buf_batch);
 
-    //auto obs_batch = obs_tensor.unsqueeze(0);
     auto obs_buf_batch = obs_buf.unsqueeze(0);
-    // std::cout << "obs_buf_batch shape: " << obs_buf_batch.sizes() << std::endl;
+
     std::vector<torch::jit::IValue> inputs;
     inputs.push_back(obs_tensor.to(torch::kHalf));
     inputs.push_back(obs_buf_batch.to(torch::kHalf));
-    // for (size_t i = 0; i < inputs.size(); i++) {
-    //     std::cout << "inputs[" << i << "] shape: " << inputs[i].toTensor().sizes() << std::endl;
-    // }
-    // Execute the model and turn its output into a tensor.
+
     torch::Tensor action_tensor = model.forward(inputs).toTensor();
     action_buf = torch::cat({action_buf.index({Slice(1,None),Slice()}),action_tensor},0);
 
-    torch::Tensor action_blend_tensor = 0.8*action_tensor + 0.2*last_action;
     last_action = action_tensor.clone();
 
     obs_buf = torch::cat({obs_buf.index({Slice(1,None),Slice()}),obs_tensor},0);
 
-    return action_blend_tensor;
+    return action_tensor;
 }
 // long long last_time = getSystemTime();  // 记录初始时间
 void State_Rl::infer()
@@ -277,12 +307,13 @@ void State_Rl::infer()
         // std::cout << "Time interval since last loop: " << time_difference << " microseconds" << std::endl;
         // last_time = current_time;
         long long _start_time = getSystemTime();
-
+        // std::cout << _start_time << std::endl;
         //torch::Tensor obs_tensor = get_obs();
         // append obs to obs buffer
         //obs_buf = torch::cat({obs_buf.index({Slice(1,None),Slice()}),obs_tensor},0);
 
         torch::Tensor action_raw = model_infer();
+        // std::cout << "action_raw: " << action_raw << std::endl;
 //        obs_buf = torch::cat({obs_buf.index({Slice(1,None),Slice()}),obs_tensor},0);
         // action filter
 //        action_raw = 0.8*action_raw + 0.2*last_action;
@@ -290,22 +321,29 @@ void State_Rl::infer()
         // append to action buffer
         // action_buf = torch::cat({action_buf.index({Slice(1,None),Slice()}),action_raw},0);
         // assign to control
-        action_raw = action_raw.squeeze(0);
-        // move to cpu
-	action_raw = action_raw.to(torch::kFloat32);
-        action_raw = action_raw.to(torch::kCPU);
+        torch::Tensor action_blend_tensor = 0.8*action_raw + 0.2*last_action;
+        action_raw = action_raw.squeeze(0).to(torch::kFloat32).to(torch::kCPU);
+        action_blend_tensor = action_blend_tensor.squeeze(0).to(torch::kFloat32).to(torch::kCPU);
         // assess the result
         auto action_getter = action_raw.accessor<float,1>();
+        auto action_blend_getter = action_blend_tensor.accessor<float,1>();
 
         write_cmd_lock.lock();
-        for (int j = 0; j < 12; j++)
+        if (_percent_1<1.1)
         {
-//            float  action_value = std::max(std::min(action_getter[j]* action_scale[j], action_delta_max), action_delta_min);
-//            action.at(j) = action_value + init_pos[j];
-//            action_temp.at(j) = action_value/action_scale[j];
-            action[j] = action_getter[j] * action_scale[j] + init_pos[j];
-            action_temp[j] = action_getter[j];
+            _percent_1 += (float) 1 / _duration_1;
+            _percent_1 = _percent_1 > 1.1 ? 1.11 : _percent_1;
+            std::cout << "_percent_1: " << _percent_1 << std::endl;
         }
+        else
+            for (int j = 0; j < 12; j++)
+            {
+    //            float  action_value = std::max(std::min(action_getter[j]* action_scale[j], action_delta_max), action_delta_min);
+    //            action.at(j) = action_value + init_pos[j];
+    //            action_temp.at(j) = action_value/action_scale[j];
+                action[j] = action_blend_getter[j] * action_scale[j] * hip_scale[j] + init_pos[j];
+                action_temp[j] = action_getter[j];
+            }
         write_cmd_lock.unlock();
 
         absoluteWait(_start_time, (long long)(infer_dt * 1000000));
@@ -333,14 +371,40 @@ void State_Rl::load_policy()
 
 FSMStateName State_Rl::checkChange()
 {
+    if(_lowState->userCmd == UserCommand::L1_Y){
+        hang_on_change_state = 0;
+        // std::cout << "hang_on_change_state" << hang_on_change_state << std::endl;
+        return FSMStateName::RL;
+    }
     if (_lowState->userCmd == UserCommand::L2_B)
     {
         return FSMStateName::PASSIVE;
     }
-    if(_lowState->userCmd == UserCommand::L2_X){
+    if (_lowState->userCmd == UserCommand::L2_X)
+    {
+        return FSMStateName::FIXEDDOWN;
+    }
+    if(_lowState->userCmd == UserCommand::L2_A){
+        std::cout << "FSMStateName::FIXEDSTAND" << std::endl;
         return FSMStateName::FIXEDSTAND;
     }
-    else{
+    if(_lowState->userCmd == UserCommand::L1_X){
+        if (hang_on_change_state == 0 || hang_on_change_state == 2){
+            hang_on_change_begin_time = getSystemTime();
+            hang_on_change_state = 1;
+            std::cout << "hang_on_change_state" << hang_on_change_state << std::endl;
+            std::cout << "hang_on_change_begin_time" << hang_on_change_begin_time << std::endl;
+        }
         return FSMStateName::RL;
     }
+    if(_lowState->userCmd == UserCommand::L1_A){
+        if (hang_on_change_state == 0 || hang_on_change_state == 1){
+            hang_on_change_begin_time = getSystemTime();
+            hang_on_change_state = 2;
+            std::cout << "hang_on_change_state" << hang_on_change_state << std::endl;
+            std::cout << "hang_on_change_begin_time" << hang_on_change_begin_time << std::endl;
+            return FSMStateName::RL;
+        }
+    }
+    return FSMStateName::RL;
 }

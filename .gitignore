@@ -7,3 +7,4 @@ depoly/devel
 depoly/.catkin_workspace
 /depoly/.catkin_tools/*
 /depoly/logs/*
+depoly/src/cmake-build-debug/*

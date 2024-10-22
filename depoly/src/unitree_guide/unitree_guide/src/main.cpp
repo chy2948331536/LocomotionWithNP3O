@@ -17,6 +17,10 @@
 using namespace unitree::robot::go2;
 #endif // COMPILE_WITH_REAL_ROBOT
 
+#ifdef COMPILE_WITH_REAL_ROBOT_FREE_DOG
+#include "interface/IOFREEDOGSDK.h"
+#endif // COMPILE_WITH_REAL_ROBOT_FREE_DOG
+
 #ifdef COMPILE_WITH_ROS
 #include "interface/KeyBoard.h"
 #include "interface/IOROS.h"
@@ -114,6 +118,11 @@ int main(int argc, char **argv)
     ctrlPlat = CtrlPlatform::REALROBOT;
 #endif // COMPILE_WITH_REAL_ROBOT
 
+#ifdef COMPILE_WITH_REAL_ROBOT_FREE_DOG
+    std::cout << "COMPILE_WITH_REAL_ROBOT_FREE_DOG" << std::endl;
+    ioInter = new IOFREEDOGSDK();
+    ctrlPlat = CtrlPlatform::REALROBOT_FREEDOG;
+#endif // COMPILE_WITH_REAL_ROBOT_FREE_DOG
     CtrlComponents *ctrlComp = new CtrlComponents(ioInter);
     ctrlComp->ctrlPlatform = ctrlPlat;
     ctrlComp->dt = 0.002; // run at 500hz

@@ -15,7 +15,7 @@ import torch
 from global_config import ROOT_DIR
 
 from PIL import Image as im
-
+torch.set_printoptions(precision=3, sci_mode=False)
 def delete_files_in_directory(directory_path):
    try:
      files = os.listdir(directory_path)
@@ -49,8 +49,9 @@ def play(args):
     env_cfg.domain_rand.disturbance = False
     env_cfg.domain_rand.randomize_kpkd = False
     env_cfg.commands.gamepad_commands = True
-    env_cfg.env.reset = False
-    env_cfg.env.terminate_after_contacts_on = ["base"]
+    env_cfg.env.reset = True
+    env_cfg.env.time_reset = False
+    env_cfg.asset.terminate_after_contacts_on = ["base"]
     # prepare environment
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
     obs = env.get_observations()

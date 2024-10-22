@@ -30,11 +30,14 @@ public:
 private:
     float _targetPos_1[12] = {0.0, 1.36, -2.65, 0.0, 1.36, -2.65,
                               0.0, 1.36, -2.65, 0.0, 1.36, -2.65};
-    float _targetPos_2[12] = {0.0, 0.9, -1.8, 0.0, 0.9, -1.8,
-                              0.0, 0.9, -1.8, 0.0, 0.9, -1.8};
+    float _targetPos_2[12] = {-0.1, 0.8, -1.5, 0.1, 0.8, -1.5, -0.1, 1.0, -1.5, 0.1, 1.0, -1.5,};
+    float _targetPos_3[12] = {-0.0, 1.5, -2.3, 0.0, 1.5, -2.3,
+                              -0.0, 1.5, -2.3, 0.0, 1.5, -2.3};
     float _startPos[12] = {0.0, 0.67, -1.3, 0.0, 0.67, -1.3,
                            0.0, 0.67, -1.3, 0.0, 0.67, -1.3};
-    float _duration_1 = 500;   // steps
+    float _startPos_rl[12] = {0.0, 0.67, -1.3, 0.0, 0.67, -1.3,
+                           0.0, 0.67, -1.3, 0.0, 0.67, -1.3};
+    float _duration_1 = 1000;   // steps
     float _duration_2 = 10; // B2
     float _percent_1 = 0;    //%
     float _percent_2 = 0;    //%
@@ -42,12 +45,12 @@ private:
     float stand_kp[12];
     float stand_kd[12];
 
-    float Kp = 30.0;
-    float Kd = 0.75;
+    float Kp = 40.0;
+    float Kd = 1;
     float infer_dt = 0.02;
 
     //gamepad
-    float smooth = 0.03;
+    float smooth = 0.2;
     float dead_zone = 0.01;
 
     float rx = 0.;
@@ -89,9 +92,18 @@ private:
     float pos_scale = 1.0;
     float vel_scale = 0.05;
     float action_scale[12] = {0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25};
+    float hip_scale[12] = {0.5,1,1,0.5,1,1,0.5,1,1,0.5,1,1};
+    // float hip_scale[12] = {1,1,1,1,1,1,1,1,1,1,1,1};
     float action_delta_max = 1.0;
     float action_delta_min = -1.0;
     //float action_scale[12] = {0.0,0.25,0.25,0.0,0.25,0.25,0.0,0.25,0.25,0.0,0.25,0.25};
+    float percent = 0.0;
+    int hang_on_change_state = 0;
+    long long hang_on_change_begin_time = 0.0;
+    int reindex[12] = {3,4,5,0,1,2,9,10,11,6,7,8};
+    at::Tensor indices;
+    int pre_hot_infer = 0;
+    // torch::TensorAccessor<float,1> action_getter;
 };
 
 #endif // RL_H

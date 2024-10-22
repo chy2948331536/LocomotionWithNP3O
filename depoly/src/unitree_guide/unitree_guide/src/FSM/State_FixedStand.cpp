@@ -12,7 +12,8 @@ void State_FixedStand::enter(){
         if(_ctrlComp->ctrlPlatform == CtrlPlatform::GAZEBO){
             _lowCmd->setSimStanceGain(i);
         }
-        else if(_ctrlComp->ctrlPlatform == CtrlPlatform::REALROBOT){
+        else if(_ctrlComp->ctrlPlatform == CtrlPlatform::REALROBOT
+            || _ctrlComp->ctrlPlatform == CtrlPlatform::REALROBOT_FREEDOG){
             _lowCmd->setRealStanceGain(i);
         }
         _lowCmd->setZeroDq(i);
@@ -37,11 +38,11 @@ void State_FixedStand::run(){
     }
     else
     {
-        _percent_2 += (float)1 / _duration_2;
-        _percent_2 = _percent_2 > 1 ? 1 : _percent_2;
+    _percent_2 += (float)1 / _duration_2;
+    _percent_2 = _percent_2 > 1 ? 1 : _percent_2;
 
-        for (int j = 0; j < 12; j++)
-        {
+    for (int j = 0; j < 12; j++)
+    {
             _lowCmd->motorCmd[j].q = (1 - _percent_2) * _targetPos_1[j] + _percent_2 * _targetPos_2[j];
         }
     }

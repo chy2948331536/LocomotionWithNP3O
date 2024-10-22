@@ -54,7 +54,15 @@ class LeggedRobot(BaseTask):
         self._prepare_cost_function()
         self.init_done = True
         self.global_counter = 0
-
+        self.percent = 0
+        self.hang_on_change_state = 0
+        self.hang_on_change_begin_time = self.gym.get_sim_time(self.sim)
+        pygame.event.pump()
+        self.button_state = {
+            'axes': [self.joystick.get_axis(i) for i in range(self.joystick.get_numaxes())],
+            'buttons': [self.joystick.get_button(i) for i in range(self.joystick.get_numbuttons())],
+            'hats': [self.joystick.get_hat(i) for i in range(self.joystick.get_numhats())]
+        }
         # self.reset_idx(torch.arange(self.num_envs, device=self.device))
         # self.post_physics_step()
 
@@ -165,14 +173,16 @@ class LeggedRobot(BaseTask):
         # joint positions offsets and PD gains
         self.default_dof_pos = torch.zeros(self.num_dof, dtype=torch.float, device=self.device, requires_grad=False)
         self.default_start_pos = torch.zeros(self.num_dof, dtype=torch.float, device=self.device, requires_grad=False)
-
+        self.shrinked_motor_angles = torch.zeros(self.num_dof, dtype=torch.float, device=self.device, requires_grad=False)
         for i in range(self.num_dofs):
             name = self.dof_names[i]
             angle = self.cfg.init_state.default_joint_angles[name]
             start_angle = self.cfg.init_state.start_joint_angles[name]
+            shrinked_motor_angles = self.cfg.init_state.shrinked_motor_angles[name]
 
             self.default_dof_pos[i] = angle
             self.default_start_pos[i] = start_angle
+            self.shrinked_motor_angles[i] = shrinked_motor_angles
 
             found = False
             for dof_name in self.cfg.control.stiffness.keys():
@@ -188,6 +198,7 @@ class LeggedRobot(BaseTask):
 
         self.default_dof_pos = self.default_dof_pos.unsqueeze(0)
         self.default_start_pos = self.default_start_pos.unsqueeze(0)
+        self.shrinked_motor_angles = self.shrinked_motor_angles.unsqueeze(0)
 
         if self.cfg.depth.use_camera:
             self.depth_buffer = torch.zeros(self.num_envs,  
@@ -363,6 +374,7 @@ class LeggedRobot(BaseTask):
         self.global_counter += 1   
         clip_actions = self.cfg.normalization.clip_actions
         self.actions = torch.clip(actions, -clip_actions, clip_actions).to(self.device)
+        print(self.actions)
         # step physics and render each frame
         self.render()
 
@@ -620,6 +632,7 @@ class LeggedRobot(BaseTask):
             'buttons': [self.joystick.get_button(i) for i in range(self.joystick.get_numbuttons())],
             'hats': [self.joystick.get_hat(i) for i in range(self.joystick.get_numhats())]
         }
+        # print(self.button_state["buttons"])
         if self.cfg.commands.gamepad_commands:
             lin_speed_x,lin_speed_y,ang_speed = -self.button_state['axes'][1]*2,-self.button_state['axes'][0]*1.5,-self.button_state['axes'][3]*2
             lin_speed_x = max(self.command_ranges["lin_vel_x"][0], min(lin_speed_x, self.command_ranges["lin_vel_x"][1]))
@@ -754,7 +767,29 @@ class LeggedRobot(BaseTask):
             joint_pos_target = self.lag_buffer[self.num_envs_indexes,self.randomized_lag,:] + self.default_dof_pos
         else:
             joint_pos_target = actions_scaled + self.default_dof_pos
-
+            if self.cfg.control.hang_leg and self.cfg.asset.hang_on:
+                joint_pos_target = self.default_dof_pos
+            elif self.cfg.control.swing_leg and self.cfg.asset.hang_on:
+                swing_phase = (torch.sin(torch.tensor(self.gym.get_sim_time(self.sim))) + 1) / 2
+                joint_pos_target = self.shrinked_motor_angles * (1 - swing_phase) + self.default_dof_pos * swing_phase
+            elif self.cfg.control.command_swing_leg and self.cfg.asset.hang_on:
+                if (self.percent == 1 or self.percent == 0) and self.button_state["buttons"][0] == 1 \
+                    and (self.gym.get_sim_time(self.sim) - self.hang_on_change_begin_time) > 0.5:
+                    self.hang_on_change_begin_time = self.gym.get_sim_time(self.sim)
+                    self.hang_on_change_state = not self.hang_on_change_state
+                    print(self.hang_on_change_state)
+                    if self.percent == 1: self.percent == 0.99999
+                    elif self.percent == 0: self.percent == 0.00001
+                if self.hang_on_change_state == True:
+                    # print(self.percent)
+                    self.percent = min((self.gym.get_sim_time(self.sim) - self.hang_on_change_begin_time)/2,1)
+                    joint_pos_target[0,0:6] = (self.shrinked_motor_angles * (1 - self.percent) + self.default_dof_pos * self.percent)[0,0:6]
+                    joint_pos_target[0,9:12] = (self.shrinked_motor_angles * (1 - self.percent) + self.default_dof_pos * self.percent)[0,9:12]
+                    joint_pos_target[0,6:9] = self.shrinked_motor_angles[0,6:9]
+                elif self.hang_on_change_state == False:
+                    # print(self.percent)
+                    self.percent = min((self.gym.get_sim_time(self.sim) - self.hang_on_change_begin_time)/2,1)
+                    joint_pos_target = self.default_dof_pos * (1 - self.percent) + self.shrinked_motor_angles * self.percent
         # joint_pos_target = torch.clamp(joint_pos_target,self.dof_pos-1,self.dof_pos+1)
 
         control_type = self.cfg.control.control_type
@@ -779,9 +814,11 @@ class LeggedRobot(BaseTask):
         self.reset_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1.,
                                    dim=1)
         self.time_out_buf = self.episode_length_buf > self.max_episode_length  # no terminal reward for time-outs
-        if self.cfg.env.reset == False:
+        if self.cfg.env.time_reset == False:
             self.time_out_buf = torch.zeros_like(self.time_out_buf)
         self.reset_buf |= self.time_out_buf
+        if self.cfg.env.reset == False:
+            self.reset_buf = torch.zeros_like(self.time_out_buf)
 
     def compute_reward(self):
         """ Compute rewards

@@ -31,14 +31,14 @@ void FSM::run(){
     // long long time_difference = current_time - last_time;
     // std::cout << "Time interval since last loop: " << time_difference << " microseconds" << std::endl;
     // last_time = current_time;
-
+    // std::cout << "FSM running" << std::endl;
     _startTime = getSystemTime();
     _ctrlComp->sendRecv();
     _ctrlComp->runWaveGen();
     _ctrlComp->estimator->run();
-    if(!checkSafty()){
-        _ctrlComp->ioInter->setPassive();
-    }
+    // if(!checkSafty()){
+    //     _ctrlComp->ioInter->setPassive();
+    // }
 
     if(_mode == FSMMode::NORMAL){
         _currentState->run();
