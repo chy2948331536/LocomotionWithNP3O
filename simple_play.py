@@ -1,4 +1,5 @@
 from configs.go2_constraint_him import Go2ConstraintHimRoughCfg, Go2ConstraintHimRoughCfgPPO
+from configs.go1_constraint_him import Go1ConstraintHimRoughCfg, Go1ConstraintHimRoughCfgPPO
 import cv2
 import os
 
@@ -49,6 +50,7 @@ def play(args):
     env_cfg.domain_rand.randomize_kpkd = False
     env_cfg.commands.gamepad_commands = True
     env_cfg.env.reset = False
+    env_cfg.env.terminate_after_contacts_on = ["base"]
     # prepare environment
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
     obs = env.get_observations()
@@ -142,7 +144,7 @@ def play(args):
 
 if __name__ == '__main__':
     task_registry.register("go2N3poHim",LeggedRobot,Go2ConstraintHimRoughCfg(),Go2ConstraintHimRoughCfgPPO())
-  
+    task_registry.register("go1N3poHim", LeggedRobot, Go1ConstraintHimRoughCfg(), Go1ConstraintHimRoughCfgPPO())
     RECORD_FRAMES = True
     args = get_args()
     play(args)

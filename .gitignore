@@ -5,3 +5,5 @@ model.pt
 depoly/build
 depoly/devel
 depoly/.catkin_workspace
+/depoly/.catkin_tools/*
+/depoly/logs/*
