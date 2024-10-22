@@ -110,7 +110,7 @@ void State_Rl::run()
             {
                 write_cmd_lock.lock();
                 _lowCmd->motorCmd[i].q = (1 - _percent_2) * _targetPos_3[i] + _percent_2 * _targetPos_2[i];
-                std::cout << _lowCmd->motorCmd[i].q << std::endl;
+                // std::cout << _lowCmd->motorCmd[i].q << std::endl;
                 write_cmd_lock.unlock();
             }
             // std::cout << "\n" <<"\n" <<std::endl;
@@ -123,7 +123,7 @@ void State_Rl::run()
             {
                 write_cmd_lock.lock();
                 _lowCmd->motorCmd[i].q = (1 - _percent_2) * _targetPos_2[i] + _percent_2 * _targetPos_3[i];
-                std::cout << _lowCmd->motorCmd[i].q << std::endl;
+                // std::cout << _lowCmd->motorCmd[i].q << std::endl;
                 write_cmd_lock.unlock();
             }
             // std::cout << "\n" <<"\n" <<std::endl;
@@ -143,8 +143,9 @@ void State_Rl::run()
                 // std::cout << _percent_1<< std::endl;
                 if(_percent_1 > 1.1)
                 {
-                    std::cout << "_percent_1 > 1.1!!!!!!!!!!!!!!!" << std::endl;
-                    _lowCmd->motorCmd[j].q = action[j];//action_filters[j]->getValue();
+                    // std::cout << "_percent_1 > 1.1!!!!!!!!!!!!!!!" << std::endl;
+                    if (!std::isnan(action[j]))
+                        _lowCmd->motorCmd[j].q = action[j];//action_filters[j]->getValue();
                 }
                 _lowCmd->motorCmd[j].dq = 0;
                 _lowCmd->motorCmd[j].Kp = Kp;
@@ -175,7 +176,7 @@ torch::Tensor State_Rl::get_obs()
     // compute gravity
     _B2G_RotMat = _lowState->getRotMat();
     _G2B_RotMat = _B2G_RotMat.transpose();
-    std::cout << "_G2B_RotMat" << _G2B_RotMat << std::endl;
+    // std::cout << "_G2B_RotMat" << _G2B_RotMat << std::endl;
 
     Vec3 angvel = _lowState->getGyro();
     Vec3 projected_gravity = _G2B_RotMat*gravity;
@@ -231,12 +232,12 @@ torch::Tensor State_Rl::get_obs()
     obs.push_back(angle);
 
     std::vector<float> posArray;
-    // std::vector<float> velArray;
+    std::vector<float> velArray;
     // pos
     for (int i = 0; i < 12; ++i)
     {
         float pos = (_lowState->motorState[i].q  - init_pos[i])* pos_scale;
-        posArray.push_back(_lowState->motorState[i].q);
+        // posArray.push_back(_lowState->motorState[i].q);
         obs.push_back(pos);
     }
     
@@ -248,11 +249,11 @@ torch::Tensor State_Rl::get_obs()
         obs.push_back(vel);
     }
 
-    std::cout << "Position Array: ";
-    for (const auto& pos : posArray) {
-        std::cout << pos << " ";
-    }
-    std::cout << std::endl;
+    // std::cout << "Position Array: ";
+    // for (const auto& pos : posArray) {
+    //     std::cout << pos << " ";
+    // }
+    // std::cout << std::endl;
 
     // std::cout << "Velocity Array: ";
     // for (const auto& vel : velArray) {
