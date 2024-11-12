@@ -21,7 +21,16 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="12f872fa-e50c-4d5a-83b9-c8749b629e66" name="Changes" comment="" />
+    <list default="true" id="12f872fa-e50c-4d5a-83b9-c8749b629e66" name="Changes" comment="Changes">
+      <change afterPath="$PROJECT_DIR$/unitree_ros-master/unitree_gazebo/worlds/stairs_world.world" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../configs/go1_constraint_him.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../configs/go1_constraint_him.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unitree_guide/unitree_guide/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/unitree_guide/unitree_guide/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../envs/legged_robot.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../envs/legged_robot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../model_10000.pt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../runner/on_constraint_policy_runner.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../runner/on_constraint_policy_runner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../simple_play.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../simple_play.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -40,13 +49,13 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/FSM/FSM.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/FSM/FSMState.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/FSM/State_FixedDown.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/FSM/State_FixedStand.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/FSM/State_Passive.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/FSM/State_Rl.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/interface/IOROS.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/FSM/FSM.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/FSM/FSMState.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/FSM/State_FixedDown.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/FSM/State_FixedStand.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/FSM/State_Passive.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/FSM/State_Rl.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/unitree_guide/unitree_guide/src/interface/IOROS.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file:///usr/include/c++/9/iostream" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectApplicationVersion">
@@ -65,28 +74,29 @@
     <option name="openDirectoriesWithSingleClick" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.RadMigrateCodeStyle": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "chy-dev-deploy",
-    "last_opened_file_path": "/home/chy/Downloads/LocomotionWithNP3O-chy-dev-deploy",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "editor.preferences.tabs",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;chy-dev&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/chy/Downloads/LocomotionWithNP3O/depoly/src/unitree_ros-master/unitree_gazebo/worlds&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.tabs&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/unitree_ros-master/unitree_gazebo/worlds" />
       <recent name="$PROJECT_DIR$/unitree_guide/unitree_guide/src/free_dog_sdk_cpp" />
       <recent name="$PROJECT_DIR$/unitree_guide/unitree_guide/include/free_dog_sdk_cpp" />
       <recent name="$PROJECT_DIR$/unitree_guide/unitree_guide/src/interface" />
@@ -96,13 +106,6 @@
       <recent name="$PROJECT_DIR$/unitree_guide/unitree_guide/src/free_dog_sdk_cpp" />
       <recent name="$PROJECT_DIR$/unitree_guide/unitree_guide/include/free_dog_sdk_cpp" />
     </key>
-  </component>
-  <component name="RunManager">
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -123,6 +126,12 @@
       <workItem from="1729392398296" duration="2385000" />
       <workItem from="1729397186912" duration="9697000" />
       <workItem from="1729473915604" duration="2056000" />
+      <workItem from="1729606074531" duration="26000" />
+      <workItem from="1729606103403" duration="1341000" />
+      <workItem from="1729649448141" duration="1000" />
+      <workItem from="1729650086830" duration="4941000" />
+      <workItem from="1729687106280" duration="393000" />
+      <workItem from="1731386700399" duration="1079000" />
     </task>
     <servers />
   </component>

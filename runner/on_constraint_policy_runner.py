@@ -12,8 +12,12 @@ from modules import ActorCriticRMA,ActorCriticRmaTrans,ActorCriticSF,ActorCritic
 from algorithm import NP3O
 from envs.vec_env import VecEnv
 from modules.depth_backbone import DepthOnlyFCBackbone58x87, RecurrentDepthBackbone
-from utils.helpers import hard_phase_schedualer, partial_checkpoint_load
+from utils.helpers import hard_phase_schedualer, partial_checkpoint_load,get_load_path
+LEGGED_GYM_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+LEGGED_GYM_ENVS_DIR = os.path.join(LEGGED_GYM_ROOT_DIR, 'legged_gym', 'envs')
+from datetime import datetime
 from copy import copy, deepcopy
+import sys
 
 class OnConstraintPolicyRunner:
 
@@ -41,7 +45,11 @@ class OnConstraintPolicyRunner:
                                                       self.env.num_actions,
                                                       **self.policy_cfg)
         if self.cfg['resume']:
-            model_dict = torch.load(os.path.join(ROOT_DIR, self.cfg['resume_path']))
+            log_root = os.path.join(LEGGED_GYM_ROOT_DIR, 'logs', train_cfg['runner']['experiment_name'])
+            log_dir = os.path.join(log_root,datetime.now().strftime('%b%d_%H-%M-%S') + '_' + train_cfg['runner']['run_name'])
+            resume_path = get_load_path(log_root, load_run=train_cfg['runner']['load_run'],
+                                        checkpoint=train_cfg['runner']['checkpoint'])
+            model_dict = torch.load(os.path.join(ROOT_DIR, resume_path))
             actor_critic.load_state_dict(model_dict['model_state_dict'])
         
         actor_critic.to(self.device)
